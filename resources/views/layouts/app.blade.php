@@ -98,7 +98,8 @@
 
                 <!-- Inventory Module -->
                 <li>
-                    <a href="#" class="flex items-center p-3 rounded-lg transition duration-150 {{ $inactiveClass }}">
+                    <a href="{{ route('services.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
+                        {{ $currentModule == 'Services' ? $activeClass : $inactiveClass }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10h16V7a2 2 0 00-2-2H6a2 2 0 00-2 2zm16 0h-4M4 7h4m0 0V5a2 2 0 012-2h4a2 2 0 012 2v2m-4 0h4m-4 0a.5.5 0 00-.5.5v2.5a.5.5 0 00.5.5h4a.5.5 0 00.5-.5v-2.5a.5.5 0 00-.5-.5h-4z"></path></svg>
                         Inventory/Services
                     </a>
