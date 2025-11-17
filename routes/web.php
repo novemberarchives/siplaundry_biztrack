@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\CustomerController;
 
 // --- INITIAL BOOTSTRAP ROUTES (TEMPORARILY UNPROTECTED) ---
@@ -34,7 +35,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('customers', CustomerController::class)->only([
         'index', 'create', 'store', 'edit', 'update'
     ]);
+
+    // 3. Services
+    Route::resource('services', ServiceController::class);
     
-    // 3. Logout
+    // 4. Logout
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 });
