@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\TransactionDetailController;
 
 // --- INITIAL BOOTSTRAP ROUTES (TEMPORARILY UNPROTECTED) ---
 
@@ -38,7 +40,16 @@ Route::middleware(['auth'])->group(function () {
 
     // 3. Services
     Route::resource('services', ServiceController::class);
+
+    // 4. Transaction Management (NOW INCLUDES SHOW, EDIT, UPDATE)
+    Route::resource('transactions', TransactionController::class)->only([
+        'index', 'create', 'store', 'show', 'edit', 'update'
+    ]);
+
+    // 5. Transaction Detail (Item Status) Update (NEW)
+    Route::put('/transaction-details/{detail}/status', [TransactionDetailController::class, 'updateStatus'])
+         ->name('transaction-details.updateStatus');
     
-    // 4. Logout
+    // 6. Logout
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 });

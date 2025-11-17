@@ -15,18 +15,26 @@
             height: calc(100vh - 4rem);
         }
         .bg-indigo-600 { background-color: #4f46e5; }
+        
+        /* NEW: CSS for the fade-out transition */
+        .toast-fade-out {
+            transition: opacity 0.5s ease-out;
+            opacity: 0;
+        }
     </style>
 </head>
 <body class="antialiased">
 
     <!-- Global Success/Error Notification Area -->
     @if (session('success'))
-        <div class="fixed top-4 right-4 z-50 p-4 bg-green-500 text-white rounded-lg shadow-xl" role="alert">
+        <!-- Added ID for JavaScript to find -->
+        <div id="toast-notification" class="fixed top-4 right-4 z-50 p-4 bg-green-500 text-white rounded-lg shadow-xl transition-opacity duration-500" role="alert">
             {{ session('success') }}
         </div>
     @endif
     @if (session('error'))
-        <div class="fixed top-4 right-4 z-50 p-4 bg-red-500 text-white rounded-lg shadow-xl" role="alert">
+        <!-- Added ID for JavaScript to find -->
+        <div id="toast-notification" class="fixed top-4 right-4 z-50 p-4 bg-red-500 text-white rounded-lg shadow-xl transition-opacity duration-500" role="alert">
             {{ session('error') }}
         </div>
     @endif
@@ -34,7 +42,7 @@
     <!-- Header/Navigation Bar -->
     <header class="h-16 bg-white shadow-md flex items-center justify-between px-4 sm:px-6 z-10">
         <!-- Logo/Title -->
-        <div class="text-xl font-bold text-indigo-600 tracking-wider">
+        <div class="text-3xl font-bold text-indigo-600 tracking-wider">
             Sip Laundry BizTrack
         </div>
 
@@ -90,9 +98,18 @@
                 
                 <!-- Transactions Module -->
                 <li>
-                    <a href="#" class="flex items-center p-3 rounded-lg transition duration-150 {{ $inactiveClass }}">
+                    <a href="{{ route('transactions.create') }}" class="flex items-center p-3 rounded-lg transition duration-150 
+                        {{ $currentModule == 'Transactions' ? $activeClass : $inactiveClass }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m-2-4h4"></path></svg>
                         New Transaction
+                    </a>
+                </li>
+                <!-- NEW: Transaction List Link -->
+                <li>
+                    <a href="{{ route('transactions.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
+                        {{ $currentModule == 'Transactions' ? $activeClass : $inactiveClass }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7l9 5 9-5M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2"></path></svg>
+                        Transaction List
                     </a>
                 </li>
 
@@ -131,5 +148,25 @@
         </main>
     </div>
 
+    <!-- NEW: Auto-hide Toast Notification Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const toast = document.getElementById('toast-notification');
+            
+            if (toast) {
+                // 1. Wait 4 seconds (4000 milliseconds)
+                setTimeout(() => {
+                    // 2. Add the fade-out class
+                    toast.classList.add('toast-fade-out');
+                    
+                    // 3. After the fade-out animation (0.5s), remove the element
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 500); // 500ms matches the CSS transition
+                    
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>

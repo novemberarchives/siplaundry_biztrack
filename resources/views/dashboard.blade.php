@@ -23,7 +23,7 @@
             <!-- Stat Card 3 -->
             <div class="bg-green-50 p-4 rounded-lg border border-green-200">
                 <p class="text-sm text-green-500 font-medium">Today's Revenue</p>
-                <p class="text-3xl font-bold text-green-700 mt-1">$450.00</p>
+                <p class="text-3xl font-bold text-green-700 mt-1">₱4050.00</p>
             </div>
         </div>
 

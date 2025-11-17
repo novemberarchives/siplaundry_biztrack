@@ -39,6 +39,7 @@ class ServiceController extends Controller
             'Description' => 'nullable|string',
             'BasePrice' => 'required|numeric|min:0',
             'Unit' => 'required|string|max:50', // e.g., "kg", "item"
+            'MinQuantity' => 'nullable|numeric|min:0', // <-- ADDED THIS
         ]);
 
         try {
@@ -76,6 +77,7 @@ class ServiceController extends Controller
             'Description' => 'nullable|string',
             'BasePrice' => 'required|numeric|min:0',
             'Unit' => 'required|string|max:50',
+            'MinQuantity' => 'nullable|numeric|min:0', // <-- ADD THIS
         ]);
 
         try {
