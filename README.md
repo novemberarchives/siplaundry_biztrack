@@ -1,4 +1,7 @@
-<<<<<<< HEAD
+# siplaundry_biztrack
+A Laravel-based web system for managing services, customers, inventory, and sales. Features include service and item CRUD, customer tracking, transaction processing with payment methods, inventory usage logging, reorder alerts, and an admin dashboard with analytics. Built with PHP, MySQL, and Bootstrap.
+>>>>>>> 4307d159a45adc1534c89e64732e08698d4e881c
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
@@ -59,6 +62,4 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 =======
-# siplaundry_biztrack
-A Laravel-based web system for managing services, customers, inventory, and sales. Features include service and item CRUD, customer tracking, transaction processing with payment methods, inventory usage logging, reorder alerts, and an admin dashboard with analytics. Built with PHP, MySQL, and Bootstrap.
->>>>>>> 4307d159a45adc1534c89e64732e08698d4e881c
+
