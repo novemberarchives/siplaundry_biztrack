@@ -8,7 +8,7 @@
 
         <header class="text-center mb-8">
             <h1 class="text-3xl font-bold text-gray-800 tracking-tight">
-                🧺 New Customer Registration
+                New Customer Registration
             </h1>
             <p class="text-gray-500 mt-2">Enter details for a new customer bringing in laundry.</p>
         </header>

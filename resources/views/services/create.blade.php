@@ -1,14 +1,12 @@
 @extends('layouts.app')
-
 @section('title', 'Add New Service | Sip Laundry')
-
 @section('content')
     <!-- Card Container -->
     <div class="w-full max-w-lg mx-auto bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-indigo-100">
 
         <header class="text-center mb-8">
             <h1 class="text-3xl font-bold text-gray-800 tracking-tight">
-                🧺 Add New Service
+                Add New Service
             </h1>
             <p class="text-gray-500 mt-2">Define a new billable service for transactions.</p>
         </header>
@@ -56,10 +54,10 @@
             </div>
 
             <!-- Base Price & Unit (Side-by-side) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- BasePrice (Required) -->
                 <div>
-                    <label for="BasePrice" class="block text-sm font-medium text-gray-700 mb-1">Base Price ($)</label>
+                    <label for="BasePrice" class="block text-sm font-medium text-gray-700 mb-1">Base Price (₱)</label>
                     <input
                         type="number"
                         step="0.01"
@@ -88,6 +86,23 @@
                         placeholder="e.g., kg, item, load"
                     >
                     @error('Unit')
+                        <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- NEW: Minimum Quantity -->
+                <div>
+                    <label for="MinQuantity" class="block text-sm font-medium text-gray-700 mb-1">Min. Qty (Opt.)</label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        id="MinQuantity"
+                        name="MinQuantity"
+                        value="{{ old('MinQuantity') }}"
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="e.g., 3.0"
+                    >
+                    @error('MinQuantity')
                         <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
