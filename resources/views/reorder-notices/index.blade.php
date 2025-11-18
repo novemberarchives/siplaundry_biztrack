@@ -1,19 +1,19 @@
 @extends('layouts.app')
-@section('title', 'Service Management | Sip Laundry')
+
+@section('title', 'Reorder Notices | Sip Laundry')
+
 @section('content')
     <!-- Page Header -->
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">
-            Service Management
+            Reorder Notices
         </h1>
-        <a href="{{ route('services.create') }}" 
-           class="flex items-center py-2 px-4 border border-transparent rounded-lg shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition duration-200">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-            Add New Service
+        <a href="{{ route('inventory.index') }}" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+            ← Back to Inventory
         </a>
     </div>
 
-    <!-- Service Table Card -->
+    <!-- Reorder Table Card -->
     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
         
         <!-- Table Container -->
@@ -22,69 +22,74 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Service ID
+                            Status
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
+                            Item Name
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Base Price
+                            Stock Level
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Unit
-                        </th>
-                        <!-- NEW COLUMN -->
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Minimum
+                            Reorder Level
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Description
+                            Date Noticed
                         </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date Resolved
+                        </th>
+                        <!-- NEW ACTIONS COLUMN -->
                         <th scope="col" class="relative px-6 py-3">
                             <span class="sr-only">Actions</span>
                         </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse ($services as $service)
+                    @forelse ($notices as $notice)
                         <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @if($notice->Status == 'Pending')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Pending
+                                    </span>
+                                @else
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Resolved
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $service->ServiceID }}
+                                {{ $notice->item->Name ?? 'Item not found' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $notice->item->Quantity <= $notice->item->ReorderLevel ? 'text-red-600' : 'text-gray-900' }}">
+                                {{ $notice->item->Quantity ?? 'N/A' }} {{ $notice->item->Unit ?? '' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $service->Name }}
+                                {{ $notice->item->ReorderLevel ?? 'N/A' }} {{ $notice->item->Unit ?? '' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                ₱{{ number_format($service->BasePrice, 2) }}
+                                {{ \Carbon\Carbon::parse($notice->NoticeDate)->format('M d, Y') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $service->Unit }}
+                                {{ $notice->ResolvedDate ? \Carbon\Carbon::parse($notice->ResolvedDate)->format('M d, Y') : 'N/A' }}
                             </td>
-                            <!-- NEW CELL -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $service->MinQuantity ? $service->MinQuantity . ' ' . $service->Unit : 'N/A' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 truncate max-w-xs">
-                                {{ $service->Description ?? 'N/A' }}
-                            </td>
+                            <!-- NEW ACTIONS CELL -->
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('services.edit', $service->ServiceID) }}" class="text-indigo-600 hover:text-indigo-900">
-                                    Edit
-                                </a>
-                                <!-- Delete Form -->
-                                <form action="{{ route('services.destroy', $service->ServiceID) }}" method="POST" class="inline ml-4" onsubmit="return confirm('Are you sure you want to delete this service? This action cannot be undone.');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900">
-                                        Delete
-                                    </button>
-                                </form>
+                                @if($notice->Status == 'Pending')
+                                    <!-- CHANGED FROM A FORM TO A LINK -->
+                                    <a href="{{ route('expenses.create', ['notice_id' => $notice->NoticeID]) }}" class="text-indigo-600 hover:text-indigo-900">
+                                        <p class="underline">Log Purchase</p>
+                                    </a>
+                                @else
+                                    <span class="text-gray-400">Resolved</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                No services found. Please add a new service.
+                                No reorder notices found.
                             </td>
                         </tr>
                     @endforelse

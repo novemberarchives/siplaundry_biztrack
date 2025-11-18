@@ -12,61 +12,53 @@
         /* Apply the custom font globally */
         body {
             font-family: 'Inter', sans-serif;
-            /* Using a dark, clean background to make the glassmorphic effect pop */
-            background: #eef2ff; 
+            /* Light, calming background (Matches layouts/app.blade.php) */
+            background-color: #f3f4f6; 
         }
     </style>
 </head>
 <!-- Use flex utilities to center content vertically and horizontally on the screen -->
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <!-- Authenticated State: Welcome Back Screen (Glassmorphism) -->
+    <!-- Authenticated State: Welcome Back Screen (Clean Card Style) -->
     @auth
-        <div class="relative min-h-screen flex items-center justify-center w-full">
+        <!-- Clean White Card -->
+        <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200 text-center">
 
-            <!-- Logo (Placeholder, assuming this is where your logo image would go) -->
-            <img src="https://placehold.co/100x100/374151/ffffff?text=LOGO" alt="Logo"
-                class="absolute top-4 left-4 w-20 md:w-28 drop-shadow-2xl z-20 rounded-lg">
+            <!-- Logo -->
+            <img src="https://placehold.co/100x100/4f46e5/ffffff?text=LOGO" alt="Logo"
+                class="w-20 md:w-24 mx-auto mb-6 rounded-lg">
 
-            <!-- Glassmorphic Card -->
-            <div class="relative backdrop-blur-xl bg-white/20 border border-white/30 
-                        shadow-2xl rounded-3xl 
-                        p-8 md:p-12 w-[90%] max-w-md text-center mx-4 z-20">
+            <!-- Welcome Text -->
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                Welcome Back, {{ Auth::user()->fullname ?? Auth::user()->username }}!
+            </h1>
+            <p class="text-gray-500 mb-8">You are already logged in.</p>
 
-                <h1 class="text-2xl md:text-3xl font-bold text-white drop-shadow mb-8 md:mb-10">
-                    Welcome Back, {{ Auth::user()->fullname ?? Auth::user()->username }}!
-                </h1>
+            <!-- Dashboard Button (Primary Style) -->
+            <form action="{{ route('dashboard') }}" method="GET" class="mb-4">
+                @csrf
+                <button type="submit"
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200">
+                    Go to Dashboard
+                </button>
+            </form>
 
-                <!-- Dashboard Button -->
-                <form action="{{ route('dashboard') }}" method="GET" class="mb-5">
-                    @csrf
-                    <button type="submit"
-                        class="w-full py-3 md:py-4 text-base md:text-lg font-semibold text-white rounded-xl
-                            bg-gradient-to-r from-indigo-500 to-blue-400
-                            hover:from-indigo-600 hover:to-blue-500 transition shadow-lg shadow-indigo-500/30">
-                        Go to Dashboard
-                    </button>
-                </form>
-
-                <!-- Logout Button -->
-                <form action="/logout" method="POST">
-                    <!-- Blade placeholder for CSRF token -->
-                    @csrf
-                    <button type="submit"
-                        class="w-full py-3 md:py-4 text-base md:text-lg font-semibold text-white rounded-xl
-                            bg-gray-600 hover:bg-gray-700 transition shadow-lg shadow-gray-700/30 mt-4">
-                        Logout
-                    </button>
-                </form>
-
-            </div>
+            <!-- Logout Button (Secondary Style) -->
+            <form action="/logout" method="POST">
+                @csrf
+                <button type="submit"
+                    class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-100 transition duration-200">
+                    Logout
+                </button>
+            </form>
         </div>
 
-    <!-- Guest State: Login Form -->
+    <!-- Guest State: Login Form (Clean Card Style) -->
     @else
 
-        <!-- Login Container: Now styled to match the register page card -->
-        <div class="w-full max-w-sm bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-indigo-100">
+        <!-- Login Container: Styled to match the app's card aesthetic -->
+        <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
 
             <header class="text-center mb-8">
                 <h1 class="text-3xl font-bold text-gray-800 tracking-tight">
@@ -123,18 +115,6 @@
                     </button>
                 </div>
             </form>
-            
-            <!-- --- New Staff Registration Button (Fixed to A-Tag) --- -->
-            <form action="{{ route('users.create') }}" method="GET">
-                @csrf
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <!-- Links to the User Creation Form via the named route users.create -->
-                    <button class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-100 transition duration-200 ease-in-out">
-                        Register New Account
-                    </button>
-                </div>
-            </form>
-
         </div>
 
     @endauth
