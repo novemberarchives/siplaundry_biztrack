@@ -6,7 +6,7 @@
 
         <header class="text-center mb-8">
             <h1 class="text-3xl font-bold text-gray-800 tracking-tight">
-                🧺 Add New Service
+                Add New Service
             </h1>
             <p class="text-gray-500 mt-2">Define a new billable service for transactions.</p>
         </header>
