@@ -56,9 +56,11 @@
 
             <!-- Add New Customer Button (Placeholder) -->
             <div class="text-right mt-4">
+                <a href="{{ route('customers.create') }}">
                 <button type="button" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
                     + Add New Customer
                 </button>
+                </a>
             </div>
         </div>
 
