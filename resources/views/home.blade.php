@@ -12,15 +12,15 @@
         /* Apply the custom font globally */
         body {
             font-family: 'Inter', sans-serif;
-            /* Using a dark, clean background to make the glassmorphic effect pop */
-            background: #eef2ff; 
+            /* Light, calming background (Matches layouts/app.blade.php) */
+            background-color: #f3f4f6; 
         }
     </style>
 </head>
 <!-- Use flex utilities to center content vertically and horizontally on the screen -->
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <!-- Authenticated State: Welcome Back Screen (Glassmorphism) -->
+    <!-- Authenticated State: Welcome Back Screen (Clean Card Style) -->
     @auth
         <!-- Clean White Card -->
         <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200 text-center">
@@ -53,12 +53,12 @@
                 </button>
             </form>
         </div>
-        
-    <!-- Guest State: Login Form -->
+
+    <!-- Guest State: Login Form (Clean Card Style) -->
     @else
 
-        <!-- Login Container: Now styled to match the register page card -->
-        <div class="w-full max-w-sm bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-indigo-100">
+        <!-- Login Container: Styled to match the app's card aesthetic -->
+        <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
 
             <header class="text-center mb-8">
                 <h1 class="text-3xl font-bold text-gray-800 tracking-tight">
@@ -115,18 +115,6 @@
                     </button>
                 </div>
             </form>
-            
-            <!-- --- New Staff Registration Button (Fixed to A-Tag) --- -->
-            <form action="{{ route('users.create') }}" method="GET">
-                @csrf
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <!-- Links to the User Creation Form via the named route users.create -->
-                    <button class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-100 transition duration-200 ease-in-out">
-                        Register New Account
-                    </button>
-                </div>
-            </form>
-
         </div>
 
     @endauth

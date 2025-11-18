@@ -24,7 +24,7 @@ class Service extends Model
         'Description',
         'BasePrice',
         'Unit',
-        'MinQuantity', // <-- ADDDED THIS for min quantity spec
+        'MinQuantity', // <-- ADD THIS
     ];
 
     /**
@@ -38,12 +38,20 @@ class Service extends Model
     }
     
     /**
-     * Define the relationship to InventoryUsage (1:M).
-     * This will be used later.
+     * Define the relationship to InventoryUsage (M:M pivot).
      */
     public function inventoryUsages()
     {
-        // A Service consumes inventory items (e.g., detergent)
+        // A Service "uses" many InventoryItems
         return $this->hasMany(InventoryUsage::class, 'ServiceID', 'ServiceID');
+    }
+
+    /**
+     * Get the inventory items that this service uses.
+     */
+    public function items()
+    {
+        return $this->belongsToMany(InventoryItem::class, 'inventory_usage', 'ServiceID', 'ItemID')
+                    ->withPivot('QuantityUsed');
     }
 }

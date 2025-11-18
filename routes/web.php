@@ -2,9 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ReorderNoticeController;
+use App\Http\Controllers\InventoryUsageController;
 use App\Http\Controllers\TransactionDetailController;
 
 // --- INITIAL BOOTSTRAP ROUTES (TEMPORARILY UNPROTECTED) ---
@@ -28,28 +33,53 @@ Route::post('/login', [UserController::class, 'login']);
 
 // --- AUTHENTICATED ROUTES ---
 Route::middleware(['auth'])->group(function () {
-    // 1. Dashboard (Landing Page after Login)
-    Route::get('/dashboard', function () {
-        return view('dashboard', ['currentModule' => 'Dashboard']);
-    })->name('dashboard');
 
-    // 2. Customer Management Module (NOW INCLUDES EDIT/UPDATE)
-    Route::resource('customers', CustomerController::class)->only([
+    // --- 1. ROUTES FOR ALL AUTHENTICATED USERS (STAFF & MANAGERS) ---
+    
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Customer Management
+    Route::resource('customers', CustomerController::class)->only([ // Fixed typo: RouteName:: to Route::
         'index', 'create', 'store', 'edit', 'update'
     ]);
 
-    // 3. Services
+    // Services (Viewing services is OK for staff to create transactions)
     Route::resource('services', ServiceController::class);
 
-    // 4. Transaction Management (NOW INCLUDES SHOW, EDIT, UPDATE)
+    // Transaction Management
     Route::resource('transactions', TransactionController::class)->only([
         'index', 'create', 'store', 'show', 'edit', 'update'
     ]);
 
-    // 5. Transaction Detail (Item Status) Update (NEW)
+    // Transaction Detail (Item Status) Update
     Route::put('/transaction-details/{detail}/status', [TransactionDetailController::class, 'updateStatus'])
          ->name('transaction-details.updateStatus');
-    
-    // 6. Logout
+
+    // Logout
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
+
+
+    // --- 2. MANAGER-ONLY ROUTES ---
+    // These routes are only accessible to users with the 'Manager' role.
+    Route::middleware(['role:Manager'])->group(function () {
+        
+        // Inventory
+        Route::resource('inventory', InventoryController::class);
+
+        // Inventory Usage Management
+        Route::post('/services/{service}/inventory-usage', [InventoryUsageController::class, 'store'])
+             ->name('inventory-usage.store');
+        Route::delete('/inventory-usage/{usage}', [InventoryUsageController::class, 'destroy'])
+             ->name('inventory-usage.destroy');
+        
+        // Expense Management
+        Route::resource('expenses', ExpenseController::class)->only(['index', 'create', 'store']);
+
+        // Reorder Notices
+        Route::get('/reorder-notices', [ReorderNoticeController::class, 'index'])
+             ->name('reorder-notices.index');
+        
+    });
+
 });
