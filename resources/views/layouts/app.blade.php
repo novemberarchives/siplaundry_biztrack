@@ -135,12 +135,19 @@
                 @if (Auth::user()->role === 'Manager')
                 <li class="pt-4 border-t border-gray-700">
                     <span class="text-xs font-semibold uppercase text-gray-500 block mb-1 px-3">Administration</span>
+
+                    <!-- NEW LINK: Analytics -->
+                    <a href="{{ route('analytics.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
+                        {{ $currentModule == 'Analytics' ? $activeClass : $inactiveClass }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m-2-4h4"></path></svg>
+                        Analytics
+                    </a>
+
                     <a href="{{ route('expenses.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 {{ $inactiveClass }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-3.1 0-5.5 1.5-5.5 4s2.4 4 5.5 4 5.5-1.5 5.5-4-2.4-4-5.5-4z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v2m0 16v2m7.4-7.4l-1.4-1.4M4.6 4.6L6 6m7.4-7.4l1.4 1.4M4.6 19.4L6 18"></path></svg>
                         Expenses
                     </a>
 
-                    <!-- NEW LINK -->
                     <a href="{{ route('reorder-notices.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
                         {{ $currentModule == 'Reorder Notices' ? $activeClass : $inactiveClass }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -152,6 +159,9 @@
                         Add Staff Account
                     </a>
                 </li>
+
+
+                
 
                 @endif
             </ul>
