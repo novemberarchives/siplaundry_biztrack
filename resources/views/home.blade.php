@@ -4,25 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sip Laundry Login</title>
-    <!-- Load Tailwind CSS for simple centering and responsiveness -->
+    <!--  Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load custom font 'Inter' -->
+    <!-- custom font 'Inter' -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Apply the custom font globally */
+        /* global custom font*/
         body {
             font-family: 'Inter', sans-serif;
-            /* Light, calming background (Matches layouts/app.blade.php) */
             background-color: #f3f4f6; 
         }
     </style>
 </head>
-<!-- Use flex utilities to center content vertically and horizontally on the screen -->
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <!-- Authenticated State: Welcome Back Screen (Clean Card Style) -->
+    <!-- Authenticated State: Welcome Back Screen-->
     @auth
-        <!-- Clean White Card -->
+        
         <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200 text-center">
 
             <!-- Logo -->
@@ -35,7 +33,7 @@
             </h1>
             <p class="text-gray-500 mb-8">You are already logged in.</p>
 
-            <!-- Dashboard Button (Primary Style) -->
+            <!-- Dashboard Button -->
             <form action="{{ route('dashboard') }}" method="GET" class="mb-4">
                 @csrf
                 <button type="submit"
@@ -44,7 +42,7 @@
                 </button>
             </form>
 
-            <!-- Logout Button (Secondary Style) -->
+            <!-- Logout Button -->
             <form action="/logout" method="POST">
                 @csrf
                 <button type="submit"
@@ -54,10 +52,10 @@
             </form>
         </div>
 
-    <!-- Guest State: Login Form (Clean Card Style) -->
+    <!-- Guest State: Login Form -->
     @else
 
-        <!-- Login Container: Styled to match the app's card aesthetic -->
+        <!-- Login Container-->
         <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
 
             <header class="text-center mb-8">
@@ -69,7 +67,6 @@
 
             <!-- Laravel Form -->
             <form method="POST" action="/login" class="space-y-6">
-                <!-- Blade placeholder for CSRF token -->
                 @csrf
 
                 <div>
@@ -83,11 +80,10 @@
                         class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out sm:text-sm"
                         placeholder="Enter your username"
                     >
-                    <!-- Blade placeholder for validation errors -->
-                    <!-- The authentication failure message is tied to this field -->
-                    <!-- @error('username')
+                    
+                     @error('username')
                         <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
-                    @enderror -->
+                    @enderror
                 </div>
 
                 <div>
@@ -100,10 +96,9 @@
                         class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out sm:text-sm"
                         placeholder="••••••••"
                     >
-                    <!-- Blade placeholder for validation errors -->
-                    <!-- @error('password')
+                    @error('password')
                         <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
-                    @enderror -->
+                    @enderror
                 </div>
 
                 <div>

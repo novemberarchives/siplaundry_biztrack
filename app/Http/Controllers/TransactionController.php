@@ -16,28 +16,33 @@ class TransactionController extends Controller
     /**
      * Display a listing of the transactions.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 1. Fetch all transactions, and eager-load the related Customer and User
-        //    to prevent N+1 query problems in the view.
-        $transactions = Transaction::with(['customer', 'user'])
-                                    ->orderBy('DateCreated', 'desc') // Show newest first
+        // --- NEW: Sorting Logic ---
+        $sortField = $request->query('sort', 'TransactionID'); // Default to ID
+        $sortDirection = $request->query('direction', 'desc'); // Default to desc
+
+        // Allowed sort fields to prevent SQL injection
+        $allowedSorts = ['TransactionID', 'DateCreated', 'TotalAmount', 'PaymentStatus'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'TransactionID';
+        }
+
+        $transactions = Transaction::with(['customer', 'user', 'transactionDetails']) // Eager load details for status
+                                    ->orderBy($sortField, $sortDirection)
                                     ->get();
         
-        // 2. Pass the transactions to the new index view
         return view('transactions.index', [
             'transactions' => $transactions,
-            'currentModule' => 'Transactions'
+            'currentModule' => 'Transactions',
+            'currentSort' => $sortField,
+            'currentDirection' => $sortDirection
         ]);
     }
 
-    /**
-     * Show the form for creating a new customer.
-     */
+    
     public function create()
     {
-        // Fetch all customers and services to pass to the view.
-        // We will use these for the customer search and service dropdowns.
         $customers = Customer::all();
         $services = Service::all();
 
@@ -48,12 +53,8 @@ class TransactionController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created transaction and its details in storage.
-     */
     public function store(Request $request)
     {
-        // 1. Validate the incoming data
         $validatedData = $request->validate([
             'CustomerID' => 'required|integer|exists:customers,CustomerID',
             'TotalAmount' => 'required|numeric|min:0',
@@ -67,23 +68,20 @@ class TransactionController extends Controller
             'cart_items.*.subtotal' => 'required|numeric',
         ]);
 
-        // 2. Use a Database Transaction
-        // This ensures that if one part fails (e.g., a detail fails),
-        // the whole transaction is rolled back.
         try {
             DB::beginTransaction();
 
-            // 3. Create the Master Transaction
             $transaction = Transaction::create([
                 'CustomerID' => $validatedData['CustomerID'],
-                'UserID' => Auth::id(), // Get the logged-in staff member's ID
-                'DateCreated' => Carbon::today()->toDateString(),
+                'UserID' => Auth::id(),
+                'DateCreated' => Carbon::today('Asia/Manila')->toDateString(),
                 'TotalAmount' => $validatedData['TotalAmount'],
                 'PaymentStatus' => $validatedData['PaymentStatus'],
                 'Notes' => $validatedData['Notes'],
+                // Set DatePaid if initially Paid
+                'DatePaid' => ($validatedData['PaymentStatus'] === 'Paid') ? Carbon::today('Asia/Manila')->toDateString() : null,
             ]);
 
-            // 4. Loop through cart items and create TransactionDetails
             foreach ($validatedData['cart_items'] as $item) {
                 TransactionDetail::create([
                     'TransactionID' => $transaction->TransactionID,
@@ -92,41 +90,29 @@ class TransactionController extends Controller
                     'Weight' => ($item['unit'] === 'kg') ? $item['quantity'] : null,
                     'PricePerUnit' => $item['price_per_unit'],
                     'Subtotal' => $item['subtotal'],
-                    'Status' => 'Pending', // Default status
+                    'Status' => 'Pending',
                 ]);
             }
 
-            // 5. If everything is successful, commit to the database
             DB::commit();
-
             return redirect()->route('dashboard')->with('success', 'Transaction #' . $transaction->TransactionID . ' created successfully!');
 
         } catch (\Exception $e) {
-            // 6. If anything failed, roll back all database changes
             DB::rollBack();
             \Log::error("Transaction creation failed: " . $e->getMessage());
-            
             return redirect()->back()->withInput()->with('error', 'Error creating transaction. Please try again.');
         }
     }
 
-    /**
-     * Display the specified transaction details.
-     */
     public function show(Transaction $transaction)
     {
-        // Eager-load all related data for the detail view
         $transaction->load(['customer', 'user', 'transactionDetails.service']);
-
         return view('transactions.show', [
             'transaction' => $transaction,
             'currentModule' => 'Transactions'
         ]);
     }
 
-    /**
-     * Show the form for editing the transaction (e.g., updating payment status).
-     */
     public function edit(Transaction $transaction)
     {
         return view('transactions.edit', [
@@ -135,9 +121,6 @@ class TransactionController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified transaction in storage.
-     */
     public function update(Request $request, Transaction $transaction)
     {
         $validatedData = $request->validate([
@@ -146,9 +129,10 @@ class TransactionController extends Controller
             'Notes' => 'nullable|string',
         ]);
 
-        // Automatically set DatePaid if status is "Paid" and DatePaid is not set
+        // --- BUG FIX: Default Timestamp ---
+        // Automatically set DatePaid if status is "Paid" and DatePaid is not manually set
         if ($validatedData['PaymentStatus'] == 'Paid' && empty($validatedData['DatePaid'])) {
-            $validatedData['DatePaid'] = Carbon::today()->toDateString();
+            $validatedData['DatePaid'] = Carbon::today('Asia/Manila')->toDateString();
         }
         // Clear DatePaid if status is reset to "Unpaid"
         if ($validatedData['PaymentStatus'] == 'Unpaid') {

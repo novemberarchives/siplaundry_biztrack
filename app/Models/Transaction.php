@@ -9,19 +9,9 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    /**
-     * This table does not use created_at/updated_at
-     */
     public $timestamps = false;
-
-    /**
-     * Define the primary key name
-     */
     protected $primaryKey = 'TransactionID';
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'CustomerID',
         'UserID',
@@ -32,27 +22,48 @@ class Transaction extends Model
         'Notes',
     ];
 
-    /**
-     * Get the customer that owns the transaction.
-     */
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'CustomerID', 'CustomerID');
     }
 
-    /**
-     * Get the user (staff) that processed the transaction.
-     */
     public function user()
     {
         return $this->belongsTo(User::class, 'UserID', 'id');
     }
 
-    /**
-     * Get the details (line items) for the transaction.
-     */
     public function transactionDetails()
     {
         return $this->hasMany(TransactionDetail::class, 'TransactionID', 'TransactionID');
+    }
+
+    // --- NEW: Aggregate Status Accessor ---
+    public function getAggregateStatusAttribute()
+    {
+        // Get all statuses from details
+        $statuses = $this->transactionDetails->pluck('Status')->toArray();
+
+        if (empty($statuses)) {
+            return 'Empty';
+        }
+
+        // Check conditions
+        if (in_array('Washing', $statuses) || in_array('Folding', $statuses)) {
+            return 'Processing';
+        }
+
+        // If all are Pending
+        if (count(array_unique($statuses)) === 1 && end($statuses) === 'Pending') {
+            return 'Pending';
+        }
+
+        // If all are Completed or Ready
+        $finished = array_filter($statuses, fn($s) => $s === 'Completed' || $s === 'Ready for Pickup');
+        if (count($finished) === count($statuses)) {
+            return 'Ready';
+        }
+
+        // Default fallback
+        return 'Processing';
     }
 }
