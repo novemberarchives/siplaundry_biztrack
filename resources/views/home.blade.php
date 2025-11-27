@@ -24,7 +24,7 @@
         <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200 text-center">
 
             <!-- Logo -->
-            <img src="https://placehold.co/100x100/4f46e5/ffffff?text=LOGO" alt="Logo"
+            <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo"
                 class="w-20 md:w-24 mx-auto mb-6 rounded-lg">
 
             <!-- Welcome Text -->
@@ -57,6 +57,9 @@
 
         <!-- Login Container-->
         <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+            <!-- Logo -->
+            <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo"
+                class="w-20 md:w-24 mx-auto mb-6 rounded-lg">
 
             <header class="text-center mb-8">
                 <h1 class="text-3xl font-bold text-gray-800 tracking-tight">
