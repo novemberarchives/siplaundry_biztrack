@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\TransactionController;
@@ -80,6 +81,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reorder-notices', [ReorderNoticeController::class, 'index'])
              ->name('reorder-notices.index');
         
+        // Analytics     
+        Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index'); 
+        Route::get('/analytics/{date}', [AnalyticsController::class, 'show'])->name('analytics.show');    
     });
 
 });
