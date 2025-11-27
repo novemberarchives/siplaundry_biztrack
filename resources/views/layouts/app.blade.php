@@ -42,8 +42,12 @@
     <!-- Header/Navigation Bar -->
     <header class="h-16 bg-white shadow-md flex items-center justify-between px-4 sm:px-6 z-10">
         <!-- Logo/Title -->
-        <div class="text-3xl font-bold text-indigo-600 tracking-wider">
-            Sip Laundry BizTrack
+        <div class="flex items-center gap-3">
+            <!-- Replace 'src' with your actual logo path, e.g., asset('images/logo.png') -->
+            <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo" class="h-9 w-9 rounded-lg shadow-sm">
+            <div class="text-3xl font-bold text-indigo-600 tracking-wide">
+                Sip Laundry BizTrack
+            </div>
         </div>
 
         <!-- User Info and Module -->
