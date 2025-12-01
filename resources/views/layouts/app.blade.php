@@ -4,198 +4,236 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Sip Laundry Manager')</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font: Plus Jakarta Sans (The standard for modern "Bento" UIs) -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'media', // Uses system settings
+            theme: {
+                fontFamily: {
+                    sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                },
+                extend: {
+                    colors: {
+                        gray: {
+                            50: '#F9FAFB',
+                            100: '#F3F4F6',
+                            200: '#E5E7EB',
+                            800: '#1F2937',
+                            900: '#111827',
+                        }
+                    }
+                }
+            },
+        }
+    </script>
+
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .h-screen-minus-header {
-            height: calc(100vh - 4rem);
-        }
-        .bg-indigo-600 { background-color: #4f46e5; }
         
-        /* NEW: CSS for the fade-out transition */
+        /* Custom thin scrollbar for sidebar */
+        .custom-scrollbar {
+            scrollbar-width: thin; 
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5); /* Gray-400 with opacity */
+            border-radius: 20px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(107, 114, 128, 0.8); /* Darker on hover */
+        }
+        
+        /* Main content scrollbar*/
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+
+        /* Fade out animation for toasts */
         .toast-fade-out {
-            transition: opacity 0.5s ease-out;
             opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
         }
     </style>
 </head>
-<body class="antialiased">
+<!-- Body: Light/Dark background -->
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 h-screen overflow-hidden flex transition-colors duration-300">
 
-    <!-- Global Success/Error Notification Area -->
+    <!-- Global Toast Notifications -->
     @if (session('success'))
-        <!-- Added ID for JavaScript to find -->
-        <div id="toast-notification" class="fixed top-4 right-4 z-50 p-4 bg-green-500 text-white rounded-lg shadow-xl transition-opacity duration-500" role="alert">
+        <div id="toast-notification" class="fixed top-6 right-6 z-50 px-6 py-4 bg-green-500 text-white rounded-2xl shadow-xl shadow-green-500/20 flex items-center gap-3 transition-all duration-500 font-medium">
+            <svg class="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             {{ session('success') }}
         </div>
     @endif
     @if (session('error'))
-        <!-- Added ID for JavaScript to find -->
-        <div id="toast-notification" class="fixed top-4 right-4 z-50 p-4 bg-red-500 text-white rounded-lg shadow-xl transition-opacity duration-500" role="alert">
+        <div id="toast-notification" class="fixed top-6 right-6 z-50 px-6 py-4 bg-red-500 text-white rounded-2xl shadow-xl shadow-red-500/20 flex items-center gap-3 transition-all duration-500 font-medium">
+            <svg class="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             {{ session('error') }}
         </div>
     @endif
-    
-    <!-- Header/Navigation Bar -->
-    <header class="h-16 bg-white shadow-md flex items-center justify-between px-4 sm:px-6 z-10">
-        <!-- Logo/Title -->
-        <div class="flex items-center gap-3">
-            <!-- Replace 'src' with your actual logo path, e.g., asset('images/logo.png') -->
-            <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo" class="h-9 w-9 rounded-lg shadow-sm">
-            <div class="text-3xl font-bold text-indigo-600 tracking-wide">
-                Sip Laundry BizTrack
+
+    <!-- 
+      SIDEBAR (Floating Island Style) 
+      - Hidden on small screens (mobile menu logic would go here in a full app)
+      - Visible on lg screens
+    -->
+    <aside class="hidden lg:flex w-72 h-screen p-4 flex-col gap-4 flex-shrink-0">
+        
+        <!-- Logo Area -->
+        <div class="h-20 bg-white dark:bg-gray-800 rounded-3xl flex items-center px-6 shadow-sm border border-gray-100 dark:border-gray-700">
+            <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo" class="w-10 h-10 flex items-center justify-center flex-shrink-0 shadow-lg">
+            <div class="ml-3">
+                <h1 class="font-bold text-lg leading-tight text-gray-900 dark:text-white">Sip Laundry</h1>
+                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">BizTrack</p>
             </div>
         </div>
 
-        <!-- User Info and Module -->
-        <div class="flex items-center space-x-4">
-            <span class="text-gray-700 font-medium hidden sm:inline">
-                Welcome, {{ Auth::user()->fullname ?? Auth::user()->username }} ({{ Auth::user()->role }})
-            </span>
-            <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-full">
-                {{ $currentModule ?? 'Dashboard' }}
-            </span>
+        <!-- Navigation Menu -->
+        <!-- Fixed: Removed overflow-y-auto and custom-scrollbar from parent nav to prevent scrollbar overlapping rounded corners -->
+        <nav class="flex-1 bg-white dark:bg-gray-800 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 p-4 flex flex-col overflow-hidden">
             
-            <!-- Logout Button -->
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="p-2 text-gray-500 hover:text-red-500 transition duration-150" title="Logout">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                </button>
-            </form>
-        </div>
-    </header>
+            <!-- Added inner container for scrolling content with padding to inset scrollbar -->
+            <div class="flex-1 flex flex-col gap-2 overflow-y-auto custom-scrollbar pr-2">
+                
+                <div class="px-4 mt-2 mb-2 text-xs font-extrabold text-gray-400 uppercase tracking-wider">Operational</div>
 
-    <!-- Main Layout Container (Sidebar + Content) -->
-    <div class="flex h-screen-minus-header">
-        
-        <!-- Sidebar Navigation -->
-        <nav class="w-64 bg-gray-800 text-white p-4 shadow-xl flex-shrink-0 hidden md:block">
-            <ul class="space-y-2">
-                <!-- Helper function to determine if a link is active -->
                 @php
-                    $activeClass = 'bg-indigo-600 hover:bg-indigo-700 text-white';
-                    $inactiveClass = 'hover:bg-gray-700 text-gray-300';
+                    // Styling logic for active/inactive links
+                    // Active: Blue background, white text
+                    // Inactive: Transparent background, gray text, hover effect
+                    $activeClass = 'bg-blue-600 text-white shadow-md shadow-blue-600/30';
+                    $inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400';
                     $currentModule = $currentModule ?? 'Dashboard';
                 @endphp
-                
-                <!-- Dashboard Link -->
-                <li>
-                    <a href="{{ route('dashboard') }}" class="flex items-center p-3 rounded-lg transition duration-150 
-                        {{ $currentModule == 'Dashboard' ? $activeClass : $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"></path></svg>
-                        Dashboard
-                    </a>
-                </li>
-                
-                <!-- Customer Module -->
-                <li>
-                    <a href="{{ route('customers.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
-                        {{ $currentModule == 'Customers' ? $activeClass : $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-4m-1.294-2.294a.5.5 0 00.354-.146l2-2a.5.5 0 000-.708l-2-2a.5.5 0 00-.708 0l-2 2a.5.5 0 000 .708zM12 12V3m0 0a.5.5 0 00-.5-.5H5.5a.5.5 0 00-.5.5v9a.5.5 0 00.5.5H12z"></path></svg>
-                        Customers
-                    </a>
-                </li>
-                
-                <!-- Transactions Module -->
-                <li>
-                    <a href="{{ route('transactions.create') }}" class="flex items-center p-3 rounded-lg transition duration-150 
-                        {{ $currentModule == 'Transactions' ? $activeClass : $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m-2-4h4"></path></svg>
-                        New Transaction
-                    </a>
-                </li>
-                <!-- Transaction List Link -->
-                <li>
-                    <a href="{{ route('transactions.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
-                        {{ $currentModule == 'Transactions' ? $activeClass : $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7l9 5 9-5M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2"></path></svg>
-                        Transaction List
-                    </a>
-                </li>
 
-                <!-- Services List Link -->
-                <li>
-                    <a href="{{ route('services.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
-                        {{ $currentModule == 'Services' ? $activeClass : $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10h16V7a2 2 0 00-2-2H6a2 2 0 00-2 2zm16 0h-4M4 7h4m0 0V5a2 2 0 012-2h4a2 2 0 012 2v2m-4 0h4m-4 0a.5.5 0 00-.5.5v2.5a.5.5 0 00.5.5h4a.5.5 0 00.5-.5v-2.5a.5.5 0 00-.5-.5h-4z"></path></svg>
-                        Services
-                    </a>
-                </li>
+                <!-- Dashboard -->
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Dashboard' ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    Overview
+                </a>
 
-                <!-- NEW: Inventory List Link -->
-                <li>
-                    <a href="{{ route('inventory.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
-                        {{ $currentModule == 'Inventory' ? $activeClass : $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                        Inventory
-                    </a>
-                </li>
-                
-                <!-- Expenses/Reorder (Manager Only) -->
+                <!-- Transactions -->
+                <a href="{{ route('transactions.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Transactions' ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    Transactions
+                </a>
+
+                <!-- Customers -->
+                <a href="{{ route('customers.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Customers' ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    Customers
+                </a>
+
+                <!-- Services -->
+                <a href="{{ route('services.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Services' ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                    Services
+                </a>
+
+                <!-- Inventory -->
+                <a href="{{ route('inventory.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Inventory' ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    Inventory
+                </a>
+
+                <!-- Manager Section -->
                 @if (Auth::user()->role === 'Manager')
-                <li class="pt-4 border-t border-gray-700">
-                    <span class="text-xs font-semibold uppercase text-gray-500 block mb-1 px-3">Administration</span>
+                    <div class="px-4 mt-6 mb-2 text-xs font-extrabold text-gray-400 uppercase tracking-wider">Manager</div>
 
-                    <!-- NEW LINK: Analytics -->
-                    <a href="{{ route('analytics.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
-                        {{ $currentModule == 'Analytics' ? $activeClass : $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m-2-4h4"></path></svg>
+                    <!-- Analytics -->
+                    <a href="{{ route('analytics.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Analytics' ? $activeClass : $inactiveClass }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m-2-4h4"></path></svg>
                         Analytics
                     </a>
 
-                    <a href="{{ route('expenses.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 {{ $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-3.1 0-5.5 1.5-5.5 4s2.4 4 5.5 4 5.5-1.5 5.5-4-2.4-4-5.5-4z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v2m0 16v2m7.4-7.4l-1.4-1.4M4.6 4.6L6 6m7.4-7.4l1.4 1.4M4.6 19.4L6 18"></path></svg>
+                    <!-- Expenses -->
+                    <a href="{{ route('expenses.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Expenses' ? $activeClass : $inactiveClass }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                         Expenses
                     </a>
 
-                    <a href="{{ route('reorder-notices.index') }}" class="flex items-center p-3 rounded-lg transition duration-150 
-                        {{ $currentModule == 'Reorder Notices' ? $activeClass : $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        Reorder Notices
+                    <!-- Reorder Notices -->
+                    <a href="{{ route('reorder-notices.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Reorder Notices' ? $activeClass : $inactiveClass }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        Alerts
                     </a>
 
-                    <a href="{{ route('users.create') }}" class="flex items-center p-3 rounded-lg transition duration-150 {{ $inactiveClass }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                        Add Staff Account
+                    <!-- Add Staff -->
+                    <a href="{{ route('users.create') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $inactiveClass }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                        Add Staff
                     </a>
-                </li>
-
-
-                
-
                 @endif
-            </ul>
+            </div>
+
         </nav>
 
-        <!-- Main Content Area -->
-        <main class="flex-1 overflow-y-auto p-6">
+        <!-- User Profile Pill (Bottom of Sidebar) -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-2 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div class="flex items-center gap-3 pl-2">
+                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-sm">
+                    {{ substr(Auth::user()->username, 0, 2) }}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-gray-900 dark:text-white truncate w-24">
+                        {{ Auth::user()->fullname ?? Auth::user()->username }}
+                    </p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                        {{ Auth::user()->role }}
+                    </p>
+                </div>
+            </div>
             
-            <!-- This is where the content from other pages will be injected -->
-            @yield('content')
+            <!-- Mini Logout Button -->
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" title="Logout">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </button>
+            </form>
+        </div>
+    </aside>
 
-        </main>
-    </div>
+    <!-- Main Content Area -->
+    <main class="flex-1 h-screen overflow-y-auto p-4 lg:p-6 lg:pl-2">
+        <!-- Content gets injected here -->
+        @yield('content')
+    </main>
 
-    <!-- NEW: Auto-hide Toast Notification Script -->
+    <!-- Auto-hide Toast Notification Script -->
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             const toast = document.getElementById('toast-notification');
-            
             if (toast) {
-                // 1. Wait 4 seconds (4000 milliseconds)
                 setTimeout(() => {
-                    // 2. Add the fade-out class
                     toast.classList.add('toast-fade-out');
-                    
-                    // 3. After the fade-out animation (0.5s), remove the element
-                    setTimeout(() => {
-                        toast.remove();
-                    }, 500); // 500ms matches the CSS transition
-                    
+                    setTimeout(() => { toast.remove(); }, 500);
                 }, 3000);
             }
         });
