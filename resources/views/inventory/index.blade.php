@@ -3,91 +3,115 @@
 @section('title', 'Inventory Management | Sip Laundry')
 
 @section('content')
-    <!-- Page Header -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">
-            Inventory Management
-        </h1>
+    <!-- Header Strip -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Inventory</h1>
+            <p class="text-gray-500 dark:text-gray-400 font-medium">Track stock levels and reorder points</p>
+        </div>
+        
+        <!-- Add New Item Button -->
         <a href="{{ route('inventory.create') }}" 
-           class="flex items-center py-2 px-4 border border-transparent rounded-lg shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition duration-200">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-            Add New Item
+           class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-200 active:scale-95 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+            Add Item
         </a>
-    </div>
+    </header>
 
     <!-- Inventory Table Card -->
-    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-6">
         
-        <!-- Table Container -->
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table class="w-full divide-y divide-gray-100 dark:divide-gray-700">
+                <thead>
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Item ID
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-20">
+                            ID
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Item Name
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Category
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Current Stock
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Stock Level
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Reorder Level
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Reorder Point
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Unit Price
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Unit Cost
                         </th>
-                        <th scope="col" class="relative px-6 py-3">
+                        <th scope="col" class="relative px-4 py-4 w-24">
                             <span class="sr-only">Actions</span>
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse ($items as $item)
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $item->ItemID }}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                <span class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold">
+                                    #{{ $item->ItemID }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $item->Name }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $item->Category ?? 'N/A' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $item->Quantity <= $item->ReorderLevel ? 'text-red-600' : 'text-gray-900' }}">
-                                {{ $item->Quantity }} {{ $item->Unit }} <!-- MODIFIED -->
-                                @if($item->Quantity <= $item->ReorderLevel)
-                                    <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        Low Stock
+                            <td class="px-4 py-4">
+                                <div class="flex items-center gap-3 min-w-[150px]">
+                                    <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex-shrink-0 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                                        {{ $item->Name }}
                                     </span>
-                                @endif
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $item->ReorderLevel }} {{ $item->Unit }} <!-- MODIFIED -->
+                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                <span class="px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 text-xs font-medium inline-block">
+                                    {{ $item->Category ?? '-' }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                ₱{{ number_format($item->UnitPrice, 2) }} / {{ $item->Unit }} <!-- MODIFIED -->
+                            <td class="px-4 py-4">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-sm font-bold {{ $item->Quantity <= $item->ReorderLevel ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">
+                                        {{ $item->Quantity }} {{ $item->Unit }}
+                                    </span>
+                                    @if($item->Quantity <= $item->ReorderLevel)
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 uppercase tracking-wide whitespace-nowrap">
+                                            Low
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('inventory.edit', $item->ItemID) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                <!-- Delete Form -->
-                                <form action="{{ route('inventory.destroy', $item->ItemID) }}" method="POST" class="inline ml-4" onsubmit="return confirm('Are you sure you want to delete this item? This action cannot be undone.');">
+                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                {{ $item->ReorderLevel }} {{ $item->Unit }}
+                            </td>
+                            <td class="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">
+                                ₱{{ number_format($item->UnitPrice, 2) }} <span class="text-gray-400 font-normal text-xs">/{{ $item->Unit }}</span>
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-3">
+                                <a href="{{ route('inventory.edit', $item->ItemID) }}" class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" title="Edit">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </a>
+                                <form action="{{ route('inventory.destroy', $item->ItemID) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item? This action cannot be undone.');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900">
-                                        Delete
+                                    <button type="submit" class="text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="Delete">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                No inventory items found. Please add a new item.
+                            <td colspan="7" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                    </div>
+                                    <p class="text-gray-500 dark:text-gray-400 font-medium">No inventory items found.</p>
+                                    <p class="text-xs text-gray-400 mt-1">Add an item to start tracking stock.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
