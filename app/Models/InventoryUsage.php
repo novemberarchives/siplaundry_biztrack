@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class InventoryUsage extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     // Explicitly define the table name since "InventoryUsage" is not standard
     protected $table = 'inventory_usage';
@@ -20,17 +21,13 @@ class InventoryUsage extends Model
         'QuantityUsed',
     ];
 
-    /**
-     * Get the service associated with this usage rule.
-     */
+    // --- Relationships ---
+
     public function service()
     {
         return $this->belongsTo(Service::class, 'ServiceID', 'ServiceID');
     }
 
-    /**
-     * Get the inventory item associated with this usage rule.
-     */
     public function item()
     {
         return $this->belongsTo(InventoryItem::class, 'ItemID', 'ItemID');
