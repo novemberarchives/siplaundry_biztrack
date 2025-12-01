@@ -6,25 +6,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Traits\Auditable; 
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Auditable; 
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are mass assignable
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'fullname', // <-- Must be here
-        'username', // <-- Must be here
-        'role',     // <-- Must be here
-        'password',
+        'fullname',
+        'username', 
+        'role',
+        'password', 
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * The attributes that should be hidden for serialization
      *
      * @var array<int, string>
      */

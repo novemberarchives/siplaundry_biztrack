@@ -10,12 +10,12 @@ class TransactionDetail extends Model
     use HasFactory;
 
     /**
-     * Define the primary key name
+     * pk name
      */
     protected $primaryKey = 'TransactionDetailID';
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are mass assignable
      */
     protected $fillable = [
         'TransactionID',

@@ -7,31 +7,29 @@
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Services</h1>
-            <p class="text-gray-500 dark:text-gray-400 font-medium">Manage the service menu and pricing</p>
+            <p class="text-gray-500 dark:text-gray-400 font-medium">Manage service menu and pricing</p>
         </div>
         
-        <!-- Add New Service Button -->
+        <!-- Add New Service Button (Manager Only) -->
+        @if(Auth::user()->role === 'Manager')
         <a href="{{ route('services.create') }}" 
            class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-200 active:scale-95 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
             Add Service
         </a>
+        @endif
     </header>
 
     <!-- Service Table Card -->
-    <!-- Changed p-8 to p-6 for more internal space -->
     <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-6">
         
         <div class="overflow-x-auto">
-            <!-- Added w-full to ensure table utilizes space -->
             <table class="w-full divide-y divide-gray-100 dark:divide-gray-700">
                 <thead>
                     <tr>
-                        <!-- Compact ID column -->
                         <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-16">
                             ID
                         </th>
-                        <!-- Main Name column gets auto width -->
                         <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Name
                         </th>
@@ -47,25 +45,26 @@
                         <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider hidden md:table-cell">
                             Description
                         </th>
+                        @if(Auth::user()->role === 'Manager')
                         <th scope="col" class="relative px-4 py-4 w-24">
                             <span class="sr-only">Actions</span>
                         </th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse ($services as $service)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
-                            <!-- ID: Fixed width, no wrap -->
+                            <!-- ... (Table data remains the same) ... -->
                             <td class="px-4 py-4 whitespace-nowrap">
                                 <span class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold">
                                     #{{ $service->ServiceID }}
                                 </span>
                             </td>
                             
-                            <!-- Name: ALLOWED TO WRAP (removed whitespace-nowrap) -->
+                            <!-- Name -->
                             <td class="px-4 py-4">
                                 <div class="flex items-center gap-3 min-w-[150px]">
-                                    <!-- Icon Avatar (Flex-shrink-0 prevents squishing) -->
                                     <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex-shrink-0 flex items-center justify-center text-blue-600 dark:text-blue-400">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
                                     </div>
@@ -89,11 +88,12 @@
                                 {{ $service->MinQuantity ? $service->MinQuantity . ' ' . $service->Unit : '-' }}
                             </td>
                             
-                            <!-- Description: Truncated to save space -->
+                            <!-- Description -->
                             <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate hidden md:table-cell">
                                 {{ $service->Description ?? '-' }}
                             </td>
                             
+                            @if(Auth::user()->role === 'Manager')
                             <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-3">
                                 <a href="{{ route('services.edit', $service->ServiceID) }}" class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -106,6 +106,7 @@
                                     </button>
                                 </form>
                             </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
@@ -115,7 +116,6 @@
                                         <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
                                     </div>
                                     <p class="text-gray-500 dark:text-gray-400 font-medium">No services found.</p>
-                                    <p class="text-xs text-gray-400 mt-1">Add a new service to get started.</p>
                                 </div>
                             </td>
                         </tr>

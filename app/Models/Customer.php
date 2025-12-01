@@ -4,23 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class Customer extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     /**
-     * Disable automatic timestamps since we are using DateCreated only.
+     * Disable automatic timestamps since we are using DateCreated only
      */
     public $timestamps = false;
     
     /**
-     * Define the primary key name to match the database schema.
+     * Define the primary key name to match the database schema
      */
     protected $primaryKey = 'CustomerID';
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are mass assignable
      *
      * @var array<int, string>
      */
@@ -33,7 +34,7 @@ class Customer extends Model
     ];
 
     /**
-     * Relationship to the Transaction model (1:M).
+     * Relationship to the Transaction model (1:M)
      */
     public function transactions()
     {

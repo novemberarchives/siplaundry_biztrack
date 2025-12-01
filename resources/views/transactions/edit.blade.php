@@ -4,15 +4,15 @@
 
 @section('content')
     <!-- Main Container (Flex for side-by-side layout on desktop) -->
-    <div class="flex flex-col lg:flex-row justify-center items-start gap-6 max-w-4xl mx-auto">
+    <div class="w-full max-w-lg mx-auto space-y-6">
         
         <!-- Header & Back Link (Side on Desktop) -->
-        <div class="w-full lg:w-auto lg:sticky lg:top-6 flex lg:flex-col items-center lg:items-end gap-2 lg:mt-10">
+        <div class="flex items-center justify-between px-2">
             <a href="{{ route('transactions.show', $transaction->TransactionID) }}" class="group flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                <span class="hidden lg:block">Back</span>
                 <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform border border-gray-100 dark:border-gray-700">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </div>
+                <span class="hidden lg:block">Back</span>
                 <span class="lg:hidden">Back to Details</span>
             </a>
         </div>
