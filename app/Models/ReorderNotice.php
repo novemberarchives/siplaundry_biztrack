@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable; 
 
 class ReorderNotice extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $primaryKey = 'NoticeID';
 
@@ -19,9 +20,8 @@ class ReorderNotice extends Model
         'Notes',
     ];
 
-    /**
-     * Get the inventory item that needs reordering.
-     */
+    // --- Relationships ---
+
     public function item()
     {
         return $this->belongsTo(InventoryItem::class, 'ItemID', 'ItemID');

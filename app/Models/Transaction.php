@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class Transaction extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     public $timestamps = false;
     protected $primaryKey = 'TransactionID';
@@ -27,6 +28,7 @@ class Transaction extends Model
         return $this->belongsTo(Customer::class, 'CustomerID', 'CustomerID');
     }
 
+    // Staff member who processed the order
     public function user()
     {
         return $this->belongsTo(User::class, 'UserID', 'id');
@@ -37,33 +39,30 @@ class Transaction extends Model
         return $this->hasMany(TransactionDetail::class, 'TransactionID', 'TransactionID');
     }
 
-    // --- NEW: Aggregate Status Accessor ---
     public function getAggregateStatusAttribute()
     {
-        // Get all statuses from details
         $statuses = $this->transactionDetails->pluck('Status')->toArray();
 
         if (empty($statuses)) {
             return 'Empty';
         }
 
-        // Check conditions
+        // If any item is in progress, the whole order is processing
         if (in_array('Washing', $statuses) || in_array('Folding', $statuses)) {
             return 'Processing';
         }
 
-        // If all are Pending
+        // Pending state check
         if (count(array_unique($statuses)) === 1 && end($statuses) === 'Pending') {
             return 'Pending';
         }
 
-        // If all are Completed or Ready
+        // Check if everything is finished
         $finished = array_filter($statuses, fn($s) => $s === 'Completed' || $s === 'Ready for Pickup');
         if (count($finished) === count($statuses)) {
             return 'Ready';
         }
 
-        // Default fallback
         return 'Processing';
     }
 }

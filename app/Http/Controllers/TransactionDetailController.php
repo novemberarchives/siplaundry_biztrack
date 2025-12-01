@@ -6,19 +6,22 @@ use App\Models\TransactionDetail;
 use App\Models\InventoryItem;
 use App\Models\InventoryUsage;
 use App\Models\ReorderNotice;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class TransactionDetailController extends Controller
 {
     /**
-     * Update the status of a specific transaction detail (line item).
+     * Update the status of a specific transaction detail
      */
     public function updateStatus(Request $request, TransactionDetail $detail)
     {
-        // Define the allowed statuses for the laundry process
+        // the allowed statuses
         $allowedStatuses = [
             'Pending',
             'Washing',
@@ -32,100 +35,109 @@ class TransactionDetailController extends Controller
             'Status' => [
                 'required',
                 'string',
-                Rule::in($allowedStatuses) // Ensure status is one of the allowed values
+                Rule::in($allowedStatuses)
             ],
         ]);
 
-        // 2. Update the status
         try {
-            DB::beginTransaction(); // Use a transaction to ensure stock and status update together
+            DB::beginTransaction();
 
-            $oldStatus = $detail->Status; // Get status *before* saving
+            $oldStatus = $detail->Status;
             $newStatus = $validated['Status'];
 
+            // Only block 'Completed' status if the transaction is Unpaid.
+            // 'Ready for Pickup', 'Washing', etc. allow the process to continue.
+            if ($newStatus === 'Completed') {
+                // Ensure we load the transaction relationship
+                $detail->load('transaction');
+                
+                if ($detail->transaction && $detail->transaction->PaymentStatus !== 'Paid') {
+                    return redirect()->back()->with('error', 'Cannot mark as Completed. The transaction must be PAID first.');
+                }
+            }
+
+            // Update the status
             $detail->Status = $newStatus;
             $detail->save();
 
-            // --- 3. NEW: AUTO-DEDUCT INVENTORY LOGIC ---
-            // We deduct stock when status is set to 'Completed'
-            // AND it was not 'Completed' before (to prevent deducting twice).
+            // --- LOGIC: Auto-Deduct Inventory ---
+            //  deduct stock when status is set to 'Completed' AND it was not 'Completed'
             if ($newStatus === 'Completed' && $oldStatus !== 'Completed') {
                 
-                // Find all usage rules for this service (e.g., "Wash & Fold")
                 $usageRules = InventoryUsage::where('ServiceID', $detail->ServiceID)->get();
 
                 if ($usageRules->isNotEmpty()) {
-                    // Get the order quantity (e.g., 5.2 kg)
+                    // Get the order quantity
                     $orderQuantity = $detail->Weight ?? $detail->Quantity;
 
                     foreach ($usageRules as $rule) {
-                        // Find the inventory item (e.g., "Detergent")
                         $inventoryItem = InventoryItem::find($rule->ItemID);
 
                         if ($inventoryItem) {
-                            // Calculate total to deduct (e.g., 5.2kg * 0.2 bags/kg = 1.04)
+                            // Calculate total to deduct
                             $totalToDeduct = $orderQuantity * $rule->QuantityUsed;
 
-                            // --- 4. NEW: DISCRETE UNIT HANDLING ---
-                            // Define units that must be whole numbers
+                            // Discrete Unit Handling
                             $discreteUnits = ['pcs', 'pc', 'item', 'pair', 'hanger', 'bag', 'bags'];
                             $itemUnit = strtolower($inventoryItem->Unit);
 
-                            // If the item's unit is discrete, round UP to the nearest whole number.
                             if (in_array($itemUnit, $discreteUnits)) {
                                 $totalToDeduct = ceil($totalToDeduct);
                             }
-                            // --- END OF NEW LOGIC ---
 
-                            // Deduct from stock (safe decrement)
+                            // Deduct from stock
                             $inventoryItem->decrement('Quantity', $totalToDeduct);
                             
-                            // --- 5. NEW: CHECK REORDER LEVEL ---
-                            $newItemQuantity = $inventoryItem->Quantity; // Get the new quantity
-                            
-                            // Check if stock is low AND if a notice for this item isn't already pending
-                            if ($newItemQuantity <= $inventoryItem->ReorderLevel) {
-                                $this->createReorderNotice($inventoryItem->ItemID);
+                            // Check Reorder Level
+                            if ($inventoryItem->Quantity <= $inventoryItem->ReorderLevel) {
+                                $this->createReorderNotice($inventoryItem->ItemID, $detail->TransactionID);
                             }
-                            // --- END OF NEW LOGIC ---
                         }
                     }
                 }
             }
-            // --- END: AUTO-DEDUCT INVENTORY LOGIC ---
 
-            DB::commit(); // Commit all changes
+            // --- AUDIT LOG ---
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'event' => 'updated',
+                'auditable_type' => TransactionDetail::class,
+                'auditable_id' => $detail->TransactionDetailID,
+                'old_values' => ['Status' => $oldStatus],
+                'new_values' => ['Status' => $newStatus],
+                'url' => $request->fullUrl(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
 
-            // 4. Redirect back to the transaction detail page
+            DB::commit();
+
             return redirect()->route('transactions.show', $detail->TransactionID)
                              ->with('success', 'Item status updated to "' . $validated['Status'] . '".');
 
         } catch (\Exception $e) {
-            DB::rollBack(); // Roll back if any part fails
-            \Log::error("Item status update failed: " . $e->getMessage());
+            DB::rollBack();
+            Log::error("Item status update failed: " . $e->getMessage());
             return redirect()->back()->with('error', 'Error updating item status.');
         }
     }
 
     /**
-     * Helper function to create a reorder notice if one isn't already pending.
+     * function to create a reorder notice if one isnt already pending
      */
-    private function createReorderNotice($itemID)
+    private function createReorderNotice($itemID, $transactionID)
     {
-        // Check if a "Pending" notice for this item already exists
         $existingNotice = ReorderNotice::where('ItemID', $itemID)
                                        ->where('Status', 'Pending')
-                                       ->exists(); // .exists() is faster
+                                       ->exists();
         
-        // If no pending notice exists, create one
         if (!$existingNotice) {
             ReorderNotice::create([
                 'ItemID' => $itemID,
-                'NoticeDate' => Carbon::today()->toDateString(),
+                'NoticeDate' => Carbon::today('Asia/Manila')->toDateString(),
                 'Status' => 'Pending',
+                'Notes' => 'Triggered by Transaction #' . $transactionID
             ]);
-            
-            // (Future Step: We could also send an email notification to the manager here)
         }
     }
 }

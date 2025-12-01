@@ -8,7 +8,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Font: Plus Jakarta Sans (The standard for modern "Bento" UIs) -->
+    <!-- Font: Plus Jakarta Sans-->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
@@ -40,7 +40,7 @@
         
         /* Custom thin scrollbar for sidebar */
         .custom-scrollbar {
-            scrollbar-width: thin; 
+            scrollbar-width: thin; /* Firefox */
             scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
         }
         .custom-scrollbar::-webkit-scrollbar {
@@ -57,7 +57,7 @@
             background-color: rgba(107, 114, 128, 0.8); /* Darker on hover */
         }
         
-        /* Main content scrollbar*/
+        /* Main content scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -98,16 +98,14 @@
         </div>
     @endif
 
-    <!-- 
-      SIDEBAR (Floating Island Style) 
-      - Hidden on small screens (mobile menu logic would go here in a full app)
-      - Visible on lg screens
-    -->
+    <!-- SIDEBAR -->
     <aside class="hidden lg:flex w-72 h-screen p-4 flex-col gap-4 flex-shrink-0">
         
         <!-- Logo Area -->
         <div class="h-20 bg-white dark:bg-gray-800 rounded-3xl flex items-center px-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo" class="w-10 h-10 flex items-center justify-center flex-shrink-0 shadow-lg">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-600/30">
+                <span class="text-white font-extrabold text-xl">S</span>
+            </div>
             <div class="ml-3">
                 <h1 class="font-bold text-lg leading-tight text-gray-900 dark:text-white">Sip Laundry</h1>
                 <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">BizTrack</p>
@@ -115,18 +113,13 @@
         </div>
 
         <!-- Navigation Menu -->
-        <!-- Fixed: Removed overflow-y-auto and custom-scrollbar from parent nav to prevent scrollbar overlapping rounded corners -->
         <nav class="flex-1 bg-white dark:bg-gray-800 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 p-4 flex flex-col overflow-hidden">
             
-            <!-- Added inner container for scrolling content with padding to inset scrollbar -->
             <div class="flex-1 flex flex-col gap-2 overflow-y-auto custom-scrollbar pr-2">
                 
                 <div class="px-4 mt-2 mb-2 text-xs font-extrabold text-gray-400 uppercase tracking-wider">Operational</div>
 
                 @php
-                    // Styling logic for active/inactive links
-                    // Active: Blue background, white text
-                    // Inactive: Transparent background, gray text, hover effect
                     $activeClass = 'bg-blue-600 text-white shadow-md shadow-blue-600/30';
                     $inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400';
                     $currentModule = $currentModule ?? 'Dashboard';
@@ -144,9 +137,9 @@
                     Transactions
                 </a>
 
-                <!-- Customers -->
+                <!-- Customers (RESTORED: User Group Icon) -->
                 <a href="{{ route('customers.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Customers' ? $activeClass : $inactiveClass }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     Customers
                 </a>
 
@@ -172,7 +165,7 @@
                         Analytics
                     </a>
 
-                    <!-- Expenses -->
+                    <!-- Expenses (RESTORED: Banknotes Icon) -->
                     <a href="{{ route('expenses.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Expenses' ? $activeClass : $inactiveClass }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                         Expenses
@@ -184,6 +177,12 @@
                         Alerts
                     </a>
 
+                    <!-- Audit Logs -->
+                    <a href="{{ route('audit-logs.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Audit Logs' ? $activeClass : $inactiveClass }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Audit Logs
+                    </a>
+
                     <!-- Add Staff -->
                     <a href="{{ route('users.create') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $inactiveClass }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
@@ -191,7 +190,6 @@
                     </a>
                 @endif
             </div>
-
         </nav>
 
         <!-- User Profile Pill (Bottom of Sidebar) -->

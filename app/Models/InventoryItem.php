@@ -4,17 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable; // audtlog trait
 
 class InventoryItem extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable; // use trait
 
     protected $primaryKey = 'ItemID';
 
     protected $fillable = [
         'Name',
         'Category',
-        'Unit', // <-- ADD THIS
+        'Unit',
         'UnitPrice',
         'Quantity',
         'ReorderLevel',
@@ -23,7 +24,7 @@ class InventoryItem extends Model
     // --- Relationships ---
 
     /**
-     * Define the relationship to InventoryUsage (M:M pivot).
+     * define relationship to InventoryUsage (M:M pivot)
      */
     public function inventoryUsages()
     {
@@ -32,7 +33,7 @@ class InventoryItem extends Model
     }
 
     /**
-     * Get the services that use this inventory item.
+     * get services that use this inventory item
      */
     public function services()
     {
@@ -41,7 +42,7 @@ class InventoryItem extends Model
     }
 
     /**
-     * Get the expense records for this item.
+     * get expense records for this item
      */
     public function expenses()
     {
@@ -49,7 +50,7 @@ class InventoryItem extends Model
     }
 
     /**
-     * Get the reorder notices for this item.
+     * get reorder notices for this item
      */
     public function reorderNotices()
     {

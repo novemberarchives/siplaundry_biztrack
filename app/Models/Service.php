@@ -4,50 +4,43 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class Service extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     /**
-     * Define the primary key name to match the database schema.
+     * pk name
      */
     protected $primaryKey = 'ServiceID';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'Name',
         'Description',
         'BasePrice',
         'Unit',
-        'MinQuantity', // <-- ADD THIS
+        'MinQuantity',
     ];
 
     /**
-     * Define the relationship to TransactionDetail (1:M).
-     * This will be used later.
+     * define relationship to TransactionDetail (1:M)
      */
     public function transactionDetails()
     {
-        // A Service can be part of many TransactionDetails
         return $this->hasMany(TransactionDetail::class, 'ServiceID', 'ServiceID');
     }
     
     /**
-     * Define the relationship to InventoryUsage (M:M pivot).
+     * define the relationship to InventoryUsage (M:M pivot)
      */
     public function inventoryUsages()
     {
-        // A Service "uses" many InventoryItems
         return $this->hasMany(InventoryUsage::class, 'ServiceID', 'ServiceID');
     }
 
     /**
-     * Get the inventory items that this service uses.
+     * get inventory items that this service uses
      */
     public function items()
     {

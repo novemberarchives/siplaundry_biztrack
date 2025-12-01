@@ -12,15 +12,26 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource (Customers).
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 1. Fetch all customers from the database
-        $customers = Customer::all(); 
+        $query = Customer::query();
+
+        // Search Logic
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('Name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('ContactNumber', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('Email', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        $customers = $query->orderBy('DateCreated', 'desc')->get();
         
-        // 2. Pass the customers to the new index view
         return view('customers.index', [
             'customers' => $customers,
-            'currentModule' => 'Customers'
+            'currentModule' => 'Customers',
+            'search' => $request->search // Pass back to view to keep input filled
         ]);
     }
 
