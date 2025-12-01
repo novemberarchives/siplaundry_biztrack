@@ -3,92 +3,96 @@
 @section('title', 'Transaction List | Sip Laundry')
 
 @section('content')
-    <!-- Page Header -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">
-            Transaction History
-        </h1>
+    <!-- Header Strip -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Transactions</h1>
+            <p class="text-gray-500 dark:text-gray-400 font-medium">View and manage order history</p>
+        </div>
+        
+        <!-- New Transaction Button -->
         <a href="{{ route('transactions.create') }}" 
-           class="flex items-center py-2 px-4 border border-transparent rounded-lg shadow-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition duration-200">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-            Create New Transaction
+           class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-200 active:scale-95 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+            New Order
         </a>
-    </div>
+    </header>
 
     <!-- Transaction Table Card -->
-    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-6">
         
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                <thead>
                     <tr>
                         <!-- Sortable Header: Transaction ID -->
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            <a href="{{ route('transactions.index', ['sort' => 'TransactionID', 'direction' => $currentSort == 'TransactionID' && $currentDirection == 'asc' ? 'desc' : 'asc']) }}" class="group flex items-center">
-                                Trans. ID
-                                <!-- Sort Icon logic -->
-                                <span class="ml-1">
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            <a href="{{ route('transactions.index', ['sort' => 'TransactionID', 'direction' => $currentSort == 'TransactionID' && $currentDirection == 'asc' ? 'desc' : 'asc']) }}" class="group flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                ID
+                                <span class="text-[10px]">
                                     @if($currentSort == 'TransactionID')
                                         @if($currentDirection == 'asc') ▲ @else ▼ @endif
                                     @else
-                                        <span class="text-gray-300">▼</span>
+                                        <span class="text-gray-300 dark:text-gray-600 group-hover:text-blue-400">▼</span>
                                     @endif
                                 </span>
                             </a>
                         </th>
                         
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Date
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Customer
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Total Amount
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Total
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Payment
                         </th>
-                        <!-- NEW: Aggregate Status -->
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Job Status
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Progress
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Processed By
+                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Staff
                         </th>
-                        <th scope="col" class="relative px-6 py-3">
+                        <th scope="col" class="relative px-4 py-4">
                             <span class="sr-only">Actions</span>
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse ($transactions as $transaction)
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                #{{ $transaction->TransactionID }}
+                        <tr onclick="window.location='{{ route('transactions.show', $transaction->TransactionID) }}'" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group cursor-pointer">
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                <span class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold">
+                                    #{{ $transaction->TransactionID }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">
                                 {{ \Carbon\Carbon::parse($transaction->DateCreated)->format('M d, Y') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $transaction->customer->Name ?? 'N/A' }}
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                <div class="font-bold text-sm text-gray-900 dark:text-white">
+                                    {{ $transaction->customer->Name ?? 'Unknown' }}
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
                                 ₱{{ number_format($transaction->TotalAmount, 2) }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <td class="px-4 py-4 whitespace-nowrap">
                                 @if($transaction->PaymentStatus == 'Paid')
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    <span class="px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-800">
                                         Paid
                                     </span>
                                 @else
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    <span class="px-3 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-bold border border-yellow-200 dark:border-yellow-800">
                                         Unpaid
                                     </span>
                                 @endif
                             </td>
-                            <!-- NEW: Detailed Progress Status Display -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <td class="px-4 py-4 whitespace-nowrap">
                                 @php 
                                     $total = $transaction->transactionDetails->count();
                                     $finished = $transaction->transactionDetails->whereIn('Status', ['Completed', 'Ready for Pickup'])->count();
@@ -96,25 +100,43 @@
 
                                 @if($total > 0)
                                     @if($finished == $total)
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Ready/Done</span>
+                                        <span class="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold border border-blue-200 dark:border-blue-800 flex items-center w-fit gap-1">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"></path></svg>
+                                            Ready
+                                        </span>
                                     @else
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{ $finished }}/{{ $total }} Orders</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-bold text-gray-600 dark:text-gray-300">{{ $finished }}/{{ $total }}</span>
+                                            <!-- Mini Progress Bar -->
+                                            <div class="w-16 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                                <div class="h-full bg-blue-500 rounded-full" style="width: {{ ($finished / $total) * 100 }}%"></div>
+                                            </div>
+                                        </div>
                                     @endif
                                 @else
-                                    <span class="text-gray-500">-</span>
+                                    <span class="text-gray-400 dark:text-gray-600 text-xs">-</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $transaction->user->fullname ?? 'N/A' }}
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                {{ $transaction->user->fullname ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('transactions.show', $transaction->TransactionID) }}" class="text-indigo-600 hover:text-indigo-900">View Details</a>
+                            <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex justify-end">
+                                    <span class="sr-only">View</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                No transactions found.
+                            <td colspan="8" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                    </div>
+                                    <p class="text-gray-500 dark:text-gray-400 font-medium">No transactions found.</p>
+                                    <p class="text-xs text-gray-400 mt-1">Create a new order to get started.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse

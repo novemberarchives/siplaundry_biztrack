@@ -3,146 +3,170 @@
 @section('title', 'Operations Dashboard | Sip Laundry')
 
 @section('content')
-    <!-- Header & Quick Actions -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h1 class="text-3xl font-bold text-gray-900">Orders</h1>
-        <div class="flex gap-2">
-            <a href="{{ route('transactions.create') }}" class="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                New Transaction
+    <!-- Header Strip -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Dashboard</h1>
+            <p class="text-gray-500 dark:text-gray-400 font-medium">Overview for {{ \Carbon\Carbon::now('Asia/Manila')->format('l, F j') }}</p>
+        </div>
+        
+        <div class="flex gap-3">
+            <!-- Alert Pill -->
+            @if(isset($lowStockCount) && $lowStockCount > 0)
+            <a href="{{ route('reorder-notices.index') }}" class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-bold hover:bg-red-200 dark:hover:bg-red-900/50 transition-all animate-pulse">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                {{ $lowStockCount }} Alerts
+            </a>
+            @endif
+
+            <!-- New Transaction Button (Enhanced UX) -->
+            <a href="{{ route('transactions.create') }}" 
+               class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-200 active:scale-95 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                New Order
             </a>
         </div>
-    </div>
+    </header>
 
-    <!-- Alert Section (Only shows if there are issues) -->
-    @if($lowStockCount > 0)
-        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 flex justify-between items-center shadow-sm">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 text-red-500">
-                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-700">
-                        <span class="font-bold">Attention:</span> You have {{ $lowStockCount }} low stock alert(s).
-                    </p>
-                </div>
-            </div>
-            <a href="{{ route('reorder-notices.index') }}" class="text-sm font-medium text-red-600 hover:text-red-500 hover:underline">View Alerts →</a>
-        </div>
-    @endif
+    <!-- Top Grid: KPI Cards (Adjusted to 3 columns) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
 
-    <!-- Main Operations Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- LEFT: Current Work Queue (Takes up 2/3 width) -->
-        <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                    <h2 class="text-lg font-bold text-gray-800 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                        Current Work Queue
-                    </h2>
-                    <span class="text-xs font-medium bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full">Next 10 Jobs</span>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($activeJobs as $job)
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        #{{ $job->transaction->TransactionID }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                        {{ $job->transaction->customer->Name }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                        {{ $job->service->Name }} 
-                                        <span class="text-gray-400 text-xs">({{ $job->Weight ? $job->Weight . 'kg' : $job->Quantity . 'pcs' }})</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($job->Status == 'Pending')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Pending</span>
-                                        @elseif($job->Status == 'Washing')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 animate-pulse">Washing</span>
-                                        @elseif($job->Status == 'Folding')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800 animate-pulse">Folding</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{{ route('transactions.show', $job->TransactionID) }}" class="text-indigo-600 hover:text-indigo-900 font-semibold">Update</a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500 italic">
-                                        No active jobs.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- RIGHT: Ready for Pickup & Today's Stats -->
-        <div class="space-y-6">
-            
-            <!-- Ready for Pickup Card -->
-            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 bg-green-50 flex justify-between items-center">
-                    <h2 class="text-lg font-bold text-gray-800 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                        Ready for Pickup
-                    </h2>
-                </div>
-                <div class="divide-y divide-gray-100">
-                    @forelse($readyJobs as $job)
-                        <div class="p-4 hover:bg-gray-50 transition">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="font-bold text-gray-800 text-sm">{{ $job->transaction->customer->Name }}</p>
-                                    <p class="text-xs text-gray-500">Order #{{ $job->transaction->TransactionID }} • {{ $job->service->Name }}</p>
-                                </div>
-                                <a href="{{ route('transactions.show', $job->TransactionID) }}" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200">
-                                    View
-                                </a>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="p-6 text-center text-sm text-gray-500 italic">
-                            No items waiting for pickup.
-                        </div>
-                    @endforelse
-                </div>
-                @if($readyJobs->isNotEmpty())
-                    <div class="bg-gray-50 px-6 py-2 text-center border-t border-gray-200">
-                        <a href="{{ route('transactions.index') }}" class="text-xs text-gray-500 hover:text-gray-700">View all transactions</a>
-                    </div>
-                @endif
-            </div>
-
-            <!-- Simple Revenue Stat -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Today's Revenue</p>
-                    <p class="text-2xl font-bold text-gray-900">₱{{ number_format($todaysRevenue, 2) }}</p>
-                </div>
-                <div class="p-3 bg-green-100 rounded-full text-green-600">
+        <!-- WIDGET 1: Daily Revenue (Green Bento Style) -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between h-48 hover:shadow-md transition group">
+            <div class="flex justify-between items-start">
+                <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-2xl text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Today</span>
+            </div>
+            <div>
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">₱{{ number_format($todaysRevenue ?? 0, 2) }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">Total Revenue</p>
+            </div>
+        </div>
+
+        <!-- WIDGET 2: Active Jobs (Blue/Indigo Bento Style) -->
+        <div class="bg-indigo-600 p-6 rounded-[2rem] shadow-lg shadow-indigo-200 dark:shadow-none text-white flex flex-col justify-between h-48 hover:scale-[1.02] transition">
+            <div class="flex justify-between items-start">
+                <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-4xl font-extrabold">{{ $activeJobs->count() ?? 0 }}</h2>
+                <p class="text-sm text-indigo-100 mt-1 font-medium">Jobs In Progress</p>
+            </div>
+        </div>
+
+        <!-- WIDGET 3: Ready for Pickup Count (Simple White Card) -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between h-48 hover:shadow-md transition">
+            <div class="flex justify-between items-start">
+                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600 dark:text-blue-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white">{{ $readyJobs->count() ?? 0 }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">Ready for Pickup</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Main Content Grid: Work Queue & Pickup List -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- LEFT: Work Queue (Bento List Style - Spans 2 Columns) -->
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-8 min-h-[400px]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Current Work Queue</h3>
+                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full uppercase tracking-wide">Priority</span>
             </div>
 
+            <div class="space-y-3">
+                @forelse($activeJobs as $job)
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-2xl transition border border-transparent hover:border-gray-100 dark:hover:border-gray-600 group cursor-pointer"
+                         onclick="window.location='{{ route('transactions.show', $job->TransactionID) }}'">
+                        
+                        <div class="flex items-center gap-4">
+                            <!-- ID Badge -->
+                            <div class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center font-bold text-sm group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                #{{ $job->transaction->TransactionID }}
+                            </div>
+                            
+                            <!-- Info -->
+                            <div>
+                                <h4 class="font-bold text-gray-900 dark:text-white">{{ $job->transaction->customer->Name }}</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                    {{ $job->service->Name }} • <span class="text-gray-400">{{ $job->Weight ? $job->Weight . 'kg' : $job->Quantity . 'pcs' }}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="mt-3 sm:mt-0 flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                            @if($job->Status == 'Pending')
+                                <span class="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold uppercase tracking-wider">Pending</span>
+                            @elseif($job->Status == 'Washing')
+                                <span class="px-4 py-2 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold uppercase tracking-wider animate-pulse">Washing</span>
+                            @elseif($job->Status == 'Folding')
+                                <span class="px-4 py-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider animate-pulse">Folding</span>
+                            @endif
+                            
+                            <!-- Arrow Icon -->
+                            <div class="text-gray-300 dark:text-gray-600 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="flex flex-col items-center justify-center h-64 text-center">
+                        <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-gray-300 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">All caught up! No active jobs.</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
+
+        <!-- RIGHT: Ready for Pickup List (Replaces "Staff on Duty") -->
+        <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-8 h-fit">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Ready for Pickup</h3>
+            
+            <div class="space-y-4">
+                @forelse($readyJobs as $job)
+                    <div class="p-5 bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30 rounded-2xl hover:shadow-sm transition group cursor-pointer"
+                         onclick="window.location='{{ route('transactions.show', $job->TransactionID) }}'">
+                        
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 px-2 py-1 rounded-lg shadow-sm">
+                                #{{ $job->transaction->TransactionID }}
+                            </span>
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+                        </div>
+                        
+                        <h4 class="font-bold text-gray-900 dark:text-white">{{ $job->transaction->customer->Name }}</h4>
+                        <p class="text-xs text-green-700 dark:text-green-300 mt-1 font-medium">{{ $job->service->Name }}</p>
+                        
+                        <div class="mt-4 pt-3 border-t border-green-200 dark:border-green-900/30 flex justify-between items-center">
+                            <span class="text-[10px] text-green-600/70 dark:text-green-400/60 font-bold uppercase">Waiting</span>
+                            <span class="text-xs font-bold text-green-700 dark:text-green-300 group-hover:underline">View →</span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="py-8 text-center">
+                        <p class="text-sm text-gray-400 dark:text-gray-500 font-medium">No items waiting.</p>
+                    </div>
+                @endforelse
+            </div>
+            
+            @if($readyJobs->isNotEmpty())
+                <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700 text-center">
+                    <a href="{{ route('transactions.index') }}" class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">View All Transactions</a>
+                </div>
+            @endif
+        </div>
+
     </div>
 @endsection

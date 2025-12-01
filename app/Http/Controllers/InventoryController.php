@@ -32,6 +32,7 @@ class InventoryController extends Controller
 
     /**
      * Store a newly created inventory item in storage.
+     */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -57,9 +58,9 @@ class InventoryController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified inventory item.
-     */
+    
+    // * Show the form for editing the specified inventory item.
+
     public function edit(InventoryItem $inventory)
     {
         // Route model binding automatically finds the item by its primary key
