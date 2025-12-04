@@ -40,7 +40,7 @@ class InventoryController extends Controller
         ]);
 
         try {
-            DB::beginTransaction(); 
+
 
             $item = InventoryItem::create($validatedData);
 
@@ -54,10 +54,10 @@ class InventoryController extends Controller
                 'module' => 'Inventory'
             ]);
 
-            DB::commit(); 
+ 
             return redirect()->route('inventory.index')->with('success', 'Item "' . $validatedData['Name'] . '" created successfully!');
         } catch (\Exception $e) {
-            DB::rollBack(); 
+ 
             Log::error("Inventory item creation failed: " . $e->getMessage());
             // show specific error message
             return redirect()->back()->withInput()->with('error', 'Creation failed: ' . $e->getMessage());

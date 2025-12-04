@@ -61,8 +61,8 @@ class TransactionDetailController extends Controller
             $detail->save();
 
             // --- LOGIC: Auto-Deduct Inventory ---
-            //  deduct stock when status is set to 'Completed' AND it was not 'Completed'
-            if ($newStatus === 'Completed' && $oldStatus !== 'Completed') {
+            //  deduct stock when status is set to 'Completed' AND old status is not 'Completed'
+            if ($newStatus === 'Completed') {
                 
                 $usageRules = InventoryUsage::where('ServiceID', $detail->ServiceID)->get();
 
