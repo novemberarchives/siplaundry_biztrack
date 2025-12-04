@@ -27,16 +27,16 @@ class ExpenseController extends Controller
     /**
      * Show the form for creating a new expense.
      */
-    public function create(Request $request) // <-- 1. ADD Request $request
+    public function create(Request $request) 
     {
-        // We pass the inventory items from here to be used in the dropdown
-        $inventoryItems = InventoryItem::orderBy('Name')->get();
-        // Get all PENDING notices
-        $pendingNotices = ReorderNotice::where('Status', 'Pending')
-                                        ->with('item') // Eager-load item info
-                                        ->get();
         
-        // --- 2. NEW: Check if a specific notice is being resolved ---
+        $inventoryItems = InventoryItem::orderBy('Name')->get();
+        // get all PENDING notices
+        $pendingNotices = ReorderNotice::where('Status', 'Pending')
+                                       ->with('item') // Eager-load item info
+                                       ->get();
+        
+
         $selectedNoticeID = $request->query('notice_id', null);
         $selectedItemID = null;
 
@@ -46,13 +46,12 @@ class ExpenseController extends Controller
                 $selectedItemID = $selectedNotice->ItemID;
             }
         }
-        // --- END NEW ---
         
         return view('expenses.create', [
             'inventoryItems' => $inventoryItems,
             'pendingNotices' => $pendingNotices,
-            'selectedNoticeID' => $selectedNoticeID, // <-- 3. PASS TO VIEW
-            'selectedItemID' => $selectedItemID,     // <-- 4. PASS TO VIEW
+            'selectedNoticeID' => $selectedNoticeID, 
+            'selectedItemID' => $selectedItemID,     
             'currentModule' => 'Expenses'
         ]);
     }
@@ -68,53 +67,53 @@ class ExpenseController extends Controller
             'QuantityPurchased' => 'required|numeric|min:0.01',
             'TotalCost' => 'required|numeric|min:0',
             'Remarks' => 'nullable|string',
-            'NoticeID' => 'nullable|integer|exists:reorder_notices,NoticeID', // <-- 1. ADD VALIDATION
+            'NoticeID' => 'nullable|integer|exists:reorder_notices,NoticeID',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // 1. Log the expense
             $expense = Expense::create($validatedData);
 
-            // 2. Find the inventory item
             $item = InventoryItem::find($validatedData['ItemID']);
 
-            // 3. Add the purchased quantity to the current stock
-            // This is the auto-restock logic:
             if ($item) {
                 $item->increment('Quantity', $validatedData['QuantityPurchased']);
+                $item->refresh(); // Reload to get the updated Quantity for comparison
             } else {
-                // If item not found, fail the transaction
+                // if not valid, fail the transaction
                 throw new \Exception('Inventory item not found.');
             }
 
             // --- 4. MODIFIED: AUTO-RESOLVE REORDER NOTICES ---
-            if (!empty($validatedData['NoticeID'])) {
-                // Case 1: A specific notice was linked from the form
-                $notice = ReorderNotice::find($validatedData['NoticeID']);
-                if ($notice) {
-                    $notice->update([
-                        'Status' => 'Resolved',
-                        'ResolvedDate' => $validatedData['Date']
-                    ]);
-                }
-            } else {
-                // Case 2 (Fallback): No notice was linked, find any pending notices for this item
-                $notices = ReorderNotice::where('ItemID', $item->ItemID)
-                                        ->where('Status', 'Pending')
-                                        ->get();
-
-                if ($notices->isNotEmpty()) {
-                    foreach ($notices as $notice) {
+            // only resolve notices if the stock level is above reorder lvl
+            if ($item->Quantity > $item->ReorderLevel) {
+                
+                if (!empty($validatedData['NoticeID'])) {
+                    // specific notice was linked from the form
+                    $notice = ReorderNotice::find($validatedData['NoticeID']);
+                    if ($notice) {
                         $notice->update([
                             'Status' => 'Resolved',
                             'ResolvedDate' => $validatedData['Date']
                         ]);
                     }
+                } else {
+      
+                    $notices = ReorderNotice::where('ItemID', $item->ItemID)
+                                            ->where('Status', 'Pending')
+                                            ->get();
+
+                    if ($notices->isNotEmpty()) {
+                        foreach ($notices as $notice) {
+                            $notice->update([
+                                'Status' => 'Resolved',
+                                'ResolvedDate' => $validatedData['Date']
+                            ]);
+                        }
+                    }
                 }
             }
-            // --- END OF MODIFIED LOGIC ---
 
             DB::commit();
 

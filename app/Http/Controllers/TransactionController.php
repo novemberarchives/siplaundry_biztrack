@@ -13,16 +13,14 @@ use Carbon\Carbon;
 
 class TransactionController extends Controller
 {
-    /**
-     * Display a listing of the transactions.
-     */
+
     public function index(Request $request)
     {
-        // --- NEW: Sorting Logic ---
-        $sortField = $request->query('sort', 'TransactionID'); // Default to ID
-        $sortDirection = $request->query('direction', 'desc'); // Default to desc
+        
+        $sortField = $request->query('sort', 'TransactionID'); // ID default
+        $sortDirection = $request->query('direction', 'desc'); // desc default
 
-        // Allowed sort fields to prevent SQL injection
+        // allowed sort arrays, anti sql injection
         $allowedSorts = ['TransactionID', 'DateCreated', 'TotalAmount', 'PaymentStatus'];
         if (!in_array($sortField, $allowedSorts)) {
             $sortField = 'TransactionID';
@@ -129,12 +127,11 @@ class TransactionController extends Controller
             'Notes' => 'nullable|string',
         ]);
 
-        // --- BUG FIX: Default Timestamp ---
-        // Automatically set DatePaid if status is "Paid" and DatePaid is not manually set
+        // default: current timestamp
         if ($validatedData['PaymentStatus'] == 'Paid' && empty($validatedData['DatePaid'])) {
             $validatedData['DatePaid'] = Carbon::today('Asia/Manila')->toDateString();
         }
-        // Clear DatePaid if status is reset to "Unpaid"
+        // clear date if unpaid
         if ($validatedData['PaymentStatus'] == 'Unpaid') {
             $validatedData['DatePaid'] = null;
         }
@@ -145,6 +142,32 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             \Log::error("Transaction update failed: " . $e->getMessage());
             return redirect()->back()->withInput()->with('error', 'Error updating transaction.');
+        }
+    }
+
+    public function markAsCompleted(Transaction $transaction)
+    {
+        try {
+            DB::beginTransaction();
+
+            // mark all individual service items as Completed
+            $transaction->transactionDetails()->update(['Status' => 'Completed']);
+
+            // ensure Payment is Paid upon collection
+            if ($transaction->PaymentStatus !== 'Paid') {
+                $transaction->update([
+                    'PaymentStatus' => 'Paid',
+                    'DatePaid' => Carbon::today('Asia/Manila')->toDateString()
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Order #' . $transaction->TransactionID . ' marked as collected & completed!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Completion failed: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Error completing order.');
         }
     }
 }
