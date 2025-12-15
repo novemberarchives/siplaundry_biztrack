@@ -92,11 +92,21 @@
                             <select id="service_select" class="block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-white rounded-xl focus:ring-0 transition-all text-sm font-medium appearance-none" disabled>
                                 <option value="">Select a service...</option>
                                 @foreach($services as $service)
+                                    @php
+                                        $unit = strtolower($service->Unit);
+                                        $rawPrice = $service->BasePrice ?? $service->Price;
+                                        $minQty = $service->MinQuantity > 0 ? $service->MinQuantity : 1;
+                                        
+                                        // If kg (Washing), calculate Price per Load (Price/Kg * Capacity)
+                                        // Otherwise, use standard Unit Price
+                                        $effectivePrice = ($unit == 'kg') ? ($rawPrice * $minQty) : $rawPrice;
+                                        $displayUnit = ($unit == 'kg') ? 'load' : $service->Unit;
+                                    @endphp
                                     <option value="{{ $service->ServiceID }}" 
-                                            data-price="{{ $service->BasePrice }}" 
+                                            data-price="{{ $effectivePrice }}" 
                                             data-unit="{{ $service->Unit }}"
                                             data-min-quantity="{{ $service->MinQuantity ?? 0 }}">
-                                        {{ $service->Name }} (₱{{ number_format($service->BasePrice, 2) }} / {{ $service->Unit }})
+                                            {{ $service->Name }} (₱{{ number_format($effectivePrice, 2) }} / {{ $displayUnit }})
                                     </option>
                                 @endforeach
                             </select>
@@ -144,8 +154,8 @@
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Service</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Qty</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Price</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Qty/Wt</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Price/Load</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Subtotal</th>
                             <th class="px-4 py-3 text-right text-xs font-bold text-gray-400 uppercase tracking-wider"></th>
                         </tr>
@@ -298,7 +308,6 @@
                 </div>
             `;
             
-            // Update Styling for Selected State
             selectedDisplay.classList.remove('bg-gray-100', 'border-gray-200');
             selectedDisplay.classList.add('bg-white', 'dark:bg-gray-800', 'border-blue-500', 'ring-4', 'ring-blue-500/10');
 
@@ -306,7 +315,6 @@
             searchInput.value = '';
             listContainer.classList.add('hidden');
             
-            // Enable Steps
             enableSteps(true);
         }
 
@@ -369,8 +377,8 @@
             const minQuantity = parseFloat(selectedOption.getAttribute('data-min-quantity'));
             
             let actualQuantity = 0;
-            let billableQuantity = 0;
             let subtotal = 0;
+            let loadInfo = '';
             
             if (unit === 'kg') {
                 actualQuantity = parseFloat(weightInput.value);
@@ -383,14 +391,17 @@
                 return;
             }
 
-            if (actualQuantity < minQuantity) {
-                billableQuantity = minQuantity;
-                alert(`Note: The minimum for ${serviceName} is ${minQuantity} ${unit}. You will be charged for the minimum amount.`);
+            // pricing logic
+            if (unit === 'kg') {
+                // Per Load
+                const capacity = minQuantity > 0 ? minQuantity : 1;
+                const loads = Math.ceil(actualQuantity / capacity);
+                subtotal = loads * price;
+                loadInfo = `(${loads} ${loads > 1 ? 'Loads' : 'Load'} @ ${capacity}kg/load)`;
             } else {
-                billableQuantity = actualQuantity;
+                // No Min enforcement
+                subtotal = actualQuantity * price;
             }
-
-            subtotal = billableQuantity * price;
 
             const cartItem = {
                 id: Date.now(),
@@ -399,7 +410,8 @@
                 quantity: actualQuantity,
                 unit: unit,
                 pricePerUnit: price,
-                subtotal: subtotal
+                subtotal: subtotal,
+                loadInfo: loadInfo 
             };
             cartItems.push(cartItem);
 
@@ -423,7 +435,10 @@
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors';
                 row.innerHTML = `
-                    <td class="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">${item.serviceName}</td>
+                    <td class="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">
+                        ${item.serviceName}
+                        ${item.loadInfo ? `<span class="block text-xs text-blue-500 font-normal">${item.loadInfo}</span>` : ''}
+                    </td>
                     <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 font-medium">${item.quantity} ${item.unit}</td>
                     <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">₱${item.pricePerUnit.toFixed(2)}</td>
                     <td class="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">₱${item.subtotal.toFixed(2)}</td>

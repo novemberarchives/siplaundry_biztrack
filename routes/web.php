@@ -30,7 +30,7 @@ Route::post('/login', [UserController::class, 'login']);
 // --- AUTHENTICATED ROUTES ---
 Route::middleware(['auth'])->group(function () {
 
-    // --- 1. ROUTES FOR ALL AUTHENTICATED USERS (STAFF & MANAGERS) ---
+    // ROUTES FOR ALL AUTHENTICATED USERS (STAFF & MANAGERS) 
     
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -44,6 +44,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('transactions', TransactionController::class)->only([
         'index', 'create', 'store', 'show', 'edit', 'update'
     ]);
+    // NEW: Route to Mark Transaction as Completed
+    Route::put('/transactions/{transaction}/complete', [TransactionController::class, 'markAsCompleted'])
+         ->name('transactions.complete');
+
     Route::put('/transaction-details/{detail}/status', [TransactionDetailController::class, 'updateStatus'])
          ->name('transaction-details.updateStatus');
 
@@ -57,7 +61,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 
 
-    // --- 2. MANAGER-ONLY ROUTES ---
+    // MANAGER-ONLY ROUTES
     Route::middleware(['role:Manager'])->group(function () {
         
         // Services (Write Access)

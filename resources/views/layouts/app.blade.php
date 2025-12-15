@@ -104,8 +104,9 @@
         <!-- Logo Area -->
         <div class="h-20 bg-white dark:bg-gray-800 rounded-3xl flex items-center px-6 shadow-sm border border-gray-100 dark:border-gray-700">
             <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-600/30">
-                <span class="text-white font-extrabold text-xl">S</span>
+                <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo" class="w-20 md:w-24 mx-auto rounded-lg">
             </div>
+            
             <div class="ml-3">
                 <h1 class="font-bold text-lg leading-tight text-gray-900 dark:text-white">Sip Laundry</h1>
                 <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">BizTrack</p>

@@ -19,7 +19,7 @@
             </a>
             @endif
 
-            <!-- New Transaction Button (Enhanced UX) -->
+            <!-- New Transaction Button-->
             <a href="{{ route('transactions.create') }}" 
                class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-200 active:scale-95 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
@@ -28,10 +28,10 @@
         </div>
     </header>
 
-    <!-- Top Grid: KPI Cards (Adjusted to 3 columns) -->
+    <!-- Top Grid-->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
 
-        <!-- WIDGET 1: Daily Revenue (Green Bento Style) -->
+        <!-- Daily Revenue -->
         <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between h-48 hover:shadow-md transition group">
             <div class="flex justify-between items-start">
                 <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-2xl text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform">
@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <!-- WIDGET 2: Active Jobs (Blue/Indigo Bento Style) -->
+        <!-- Active Jobs  -->
         <div class="bg-indigo-600 p-6 rounded-[2rem] shadow-lg shadow-indigo-200 dark:shadow-none text-white flex flex-col justify-between h-48 hover:scale-[1.02] transition">
             <div class="flex justify-between items-start">
                 <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
@@ -58,7 +58,7 @@
             </div>
         </div>
 
-        <!-- WIDGET 3: Ready for Pickup Count (Simple White Card) -->
+        <!-- Ready for Pickup Count -->
         <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between h-48 hover:shadow-md transition">
             <div class="flex justify-between items-start">
                 <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600 dark:text-blue-400">
@@ -73,10 +73,10 @@
 
     </div>
 
-    <!-- Main Content Grid: Work Queue & Pickup List -->
+    <!-- Main Content Grid Work Queue & Pickup List -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- LEFT: Work Queue (Bento List Style - Spans 2 Columns) -->
+        <!-- Work Queue -->
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-8 min-h-[400px]">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Current Work Queue</h3>
@@ -130,28 +130,38 @@
             </div>
         </div>
 
-        <!-- RIGHT: Ready for Pickup List (Replaces "Staff on Duty") -->
+        <!-- Ready for Pickup List -->
         <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-8 h-fit">
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Ready for Pickup</h3>
             
             <div class="space-y-4">
                 @forelse($readyJobs as $job)
-                    <div class="p-5 bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30 rounded-2xl hover:shadow-sm transition group cursor-pointer"
-                         onclick="window.location='{{ route('transactions.show', $job->TransactionID) }}'">
+                    <div class="p-5 bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30 rounded-2xl hover:shadow-sm transition group">
                         
-                        <div class="flex justify-between items-start mb-2">
+                        <div class="flex justify-between items-start mb-2" onclick="window.location='{{ route('transactions.show', $job->TransactionID) }}'" style="cursor: pointer;">
                             <span class="text-xs font-bold bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 px-2 py-1 rounded-lg shadow-sm">
                                 #{{ $job->transaction->TransactionID }}
                             </span>
                             <div class="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
                         </div>
                         
-                        <h4 class="font-bold text-gray-900 dark:text-white">{{ $job->transaction->customer->Name }}</h4>
-                        <p class="text-xs text-green-700 dark:text-green-300 mt-1 font-medium">{{ $job->service->Name }}</p>
+                        <div onclick="window.location='{{ route('transactions.show', $job->TransactionID) }}'" style="cursor: pointer;">
+                            <h4 class="font-bold text-gray-900 dark:text-white">{{ $job->transaction->customer->Name }}</h4>
+                            <p class="text-xs text-green-700 dark:text-green-300 mt-1 font-medium">{{ $job->service->Name }}</p>
+                        </div>
                         
-                        <div class="mt-4 pt-3 border-t border-green-200 dark:border-green-900/30 flex justify-between items-center">
-                            <span class="text-[10px] text-green-600/70 dark:text-green-400/60 font-bold uppercase">Waiting</span>
-                            <span class="text-xs font-bold text-green-700 dark:text-green-300 group-hover:underline">View →</span>
+                        <!-- Mark Collected Button -->
+                        <div class="mt-4 pt-3 border-t border-green-200 dark:border-green-900/30">
+                            <form action="{{ route('transactions.complete', $job->transaction->TransactionID) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" 
+                                        onclick="return confirm('Confirm that Order #{{ $job->transaction->TransactionID }} is paid and has been handed to the customer?')"
+                                        class="w-full flex items-center justify-center gap-2 py-2 bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 rounded-xl text-xs font-bold shadow-sm border border-green-100 dark:border-gray-600 hover:bg-green-600 hover:text-white dark:hover:bg-green-500 dark:hover:text-white transition-all duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    Mark Collected
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @empty
