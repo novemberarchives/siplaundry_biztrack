@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\InventoryItem;
-use App\Models\ReorderNotice; 
-use App\Models\AuditLog;    
+use App\Models\ReorderNotice; // Import ReorderNotice
+use App\Models\AuditLog;      // Import AuditLog
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\DB; // Added DB Facade
 use Carbon\Carbon;
 
 class InventoryController extends Controller
@@ -40,26 +40,45 @@ class InventoryController extends Controller
         ]);
 
         try {
-
+            DB::beginTransaction(); // Start Transaction
 
             $item = InventoryItem::create($validatedData);
 
+            // --- REORDER LOGIC FOR NEW ITEMS ---
+            $qty = (float) $item->Quantity;
+            $level = (float) $item->ReorderLevel;
+
+            if ($qty <= $level) {
+                $notice = new ReorderNotice();
+                $notice->ItemID = $item->ItemID;
+                $notice->NoticeDate = Carbon::today('Asia/Manila')->toDateString();
+                $notice->Status = 'Pending';
+                $notice->Notes = 'Initial stock set below reorder level.';
+                $notice->save();
+            }
+            // -----------------------------------
+
             // AUDIT LOG
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'event' => 'Created Item', 
-                'auditable_type' => InventoryItem::class, 
-                'auditable_id' => $item->ItemID,        
+            $log = new AuditLog();
+            $log->user_id = Auth::id();
+            $log->event = 'Created Item';
+            $log->auditable_type = InventoryItem::class;
+            $log->auditable_id = $item->ItemID;
+            $log->url = request()->fullUrl();
+            $log->ip_address = request()->ip();
+            $log->user_agent = request()->userAgent();
+            // FIX: Store details in 'new_values' array instead of non-existent columns
+            $log->new_values = [
                 'details' => "Added item: {$item->Name}",
                 'module' => 'Inventory'
-            ]);
+            ];
+            $log->save();
 
- 
+            DB::commit(); 
             return redirect()->route('inventory.index')->with('success', 'Item "' . $validatedData['Name'] . '" created successfully!');
         } catch (\Exception $e) {
- 
+            DB::rollBack(); 
             Log::error("Inventory item creation failed: " . $e->getMessage());
-            // show specific error message
             return redirect()->back()->withInput()->with('error', 'Creation failed: ' . $e->getMessage());
         }
     }
@@ -88,38 +107,54 @@ class InventoryController extends Controller
 
             $inventory->update($validatedData);
 
-            if ($inventory->Quantity <= $inventory->ReorderLevel) {
-                // Check if notice exists
+            // --- REORDER LOGIC ---
+            $newQty = (float) $inventory->Quantity;
+            $reorderLevel = (float) $inventory->ReorderLevel;
+
+            if ($newQty > $reorderLevel) {
+                ReorderNotice::where('ItemID', $inventory->ItemID)
+                             ->where('Status', 'Pending')
+                             ->update([
+                                 'Status' => 'Resolved',
+                                 'Notes' => 'Auto-resolved: Stock replenished above reorder level.'
+                             ]);
+            } 
+            elseif ($newQty <= $reorderLevel) {
                 $existingNotice = ReorderNotice::where('ItemID', $inventory->ItemID)
                                                ->where('Status', 'Pending')
                                                ->exists();
                 if (!$existingNotice) {
-                    ReorderNotice::create([
-                        'ItemID' => $inventory->ItemID,
-                        'NoticeDate' => Carbon::today('Asia/Manila')->toDateString(),
-                        'Status' => 'Pending',
-                        'Notes' => 'Triggered by manual inventory update.'
-                    ]);
+                    $notice = new ReorderNotice();
+                    $notice->ItemID = $inventory->ItemID;
+                    $notice->NoticeDate = Carbon::today('Asia/Manila')->toDateString();
+                    $notice->Status = 'Pending';
+                    $notice->Notes = 'Triggered by manual inventory update.';
+                    $notice->save();
                 }
             }
+            // -----------------------------
 
             // AUDIT LOG
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'event' => 'Updated Item',
-                'auditable_type' => InventoryItem::class, 
-                'auditable_id' => $inventory->ItemID,     
+            $log = new AuditLog();
+            $log->user_id = Auth::id();
+            $log->event = 'Updated Item';
+            $log->auditable_type = InventoryItem::class;
+            $log->auditable_id = $inventory->ItemID;
+            $log->url = request()->fullUrl();
+            $log->ip_address = request()->ip();
+            $log->user_agent = request()->userAgent();
+            // FIX: Store details in 'new_values' array instead of non-existent columns
+            $log->new_values = [
                 'details' => "Updated item: {$inventory->Name}. New Stock: {$inventory->Quantity}",
                 'module' => 'Inventory'
-            ]);
+            ];
+            $log->save();
 
-            DB::commit(); // Commit 
+            DB::commit(); 
             return redirect()->route('inventory.index')->with('success', 'Item "' . $inventory->Name . '" updated successfully!');
         } catch (\Exception $e) {
-            DB::rollBack(); // Rollback 
+            DB::rollBack(); 
             Log::error("Inventory item update failed: " . $e->getMessage());
-            
-            // return error message
             return redirect()->back()->withInput()->with('error', 'Update Error: ' . $e->getMessage());
         }
     }
@@ -127,26 +162,32 @@ class InventoryController extends Controller
     public function destroy(InventoryItem $inventory)
     {
         try {
-            DB::beginTransaction(); // start transaction
+            DB::beginTransaction(); 
 
             $name = $inventory->Name;
-            $id = $inventory->ItemID; // ID before deletion
+            $id = $inventory->ItemID; 
             $inventory->delete();
 
             // AUDIT LOG
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'event' => 'Deleted Item',
-                'auditable_type' => InventoryItem::class, 
-                'auditable_id' => $id,                   
+            $log = new AuditLog();
+            $log->user_id = Auth::id();
+            $log->event = 'Deleted Item';
+            $log->auditable_type = InventoryItem::class;
+            $log->auditable_id = $id;
+            $log->url = request()->fullUrl();
+            $log->ip_address = request()->ip();
+            $log->user_agent = request()->userAgent();
+            // FIX: Store details in 'new_values' array instead of non-existent columns
+            $log->new_values = [
                 'details' => "Deleted item: {$name}",
                 'module' => 'Inventory'
-            ]);
+            ];
+            $log->save();
 
-            DB::commit(); // Commit
+            DB::commit(); 
             return redirect()->route('inventory.index')->with('success', 'Item "' . $name . '" deleted successfully.');
         } catch (\Exception $e) {
-            DB::rollBack(); // Rollback 
+            DB::rollBack(); 
             Log::error("Inventory item deletion failed: " . $e->getMessage());
             return redirect()->route('inventory.index')->with('error', 'Delete Error: ' . $e->getMessage());
         }

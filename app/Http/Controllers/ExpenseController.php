@@ -31,12 +31,12 @@ class ExpenseController extends Controller
     {
         
         $inventoryItems = InventoryItem::orderBy('Name')->get();
-        // get all PENDING notices
+        // Get all PENDING notices
         $pendingNotices = ReorderNotice::where('Status', 'Pending')
                                        ->with('item') // Eager-load item info
                                        ->get();
         
-
+        // --- Check if a specific notice is being resolved ---
         $selectedNoticeID = $request->query('notice_id', null);
         $selectedItemID = null;
 
@@ -67,26 +67,28 @@ class ExpenseController extends Controller
             'QuantityPurchased' => 'required|numeric|min:0.01',
             'TotalCost' => 'required|numeric|min:0',
             'Remarks' => 'nullable|string',
-            'NoticeID' => 'nullable|integer|exists:reorder_notices,NoticeID',
+            'NoticeID' => 'nullable|integer|exists:reorder_notices,NoticeID', 
         ]);
 
         try {
             DB::beginTransaction();
 
+            // 1. Log the expense
             $expense = Expense::create($validatedData);
 
+            // 2. Find the inventory item
             $item = InventoryItem::find($validatedData['ItemID']);
 
+            // 3. Add the purchased quantity to the current stock
             if ($item) {
                 $item->increment('Quantity', $validatedData['QuantityPurchased']);
                 $item->refresh(); // Reload to get the updated Quantity for comparison
             } else {
-                // if not valid, fail the transaction
                 throw new \Exception('Inventory item not found.');
             }
 
-            // --- 4. MODIFIED: AUTO-RESOLVE REORDER NOTICES ---
-            // only resolve notices if the stock level is above reorder lvl
+            // --- 4. STRICT RESOLUTION LOGIC ---
+            // Only resolve notices if the NEW stock level is strictly ABOVE the Reorder Level
             if ($item->Quantity > $item->ReorderLevel) {
                 
                 if (!empty($validatedData['NoticeID'])) {
@@ -99,7 +101,7 @@ class ExpenseController extends Controller
                         ]);
                     }
                 } else {
-      
+                    // Auto-resolve any general pending notices for this item
                     $notices = ReorderNotice::where('ItemID', $item->ItemID)
                                             ->where('Status', 'Pending')
                                             ->get();
@@ -114,6 +116,7 @@ class ExpenseController extends Controller
                     }
                 }
             }
+            // -----------------------------------------------------
 
             DB::commit();
 
