@@ -44,6 +44,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('transactions', TransactionController::class)->only([
         'index', 'create', 'store', 'show', 'edit', 'update'
     ]);
+    
+    // NEW: Print Route
+    Route::get('/transactions/{transaction}/print', [TransactionController::class, 'print'])
+         ->name('transactions.print');
+
     // NEW: Route to Mark Transaction as Completed
     Route::put('/transactions/{transaction}/complete', [TransactionController::class, 'markAsCompleted'])
          ->name('transactions.complete');

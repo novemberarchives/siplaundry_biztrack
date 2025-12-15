@@ -8,7 +8,7 @@ use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\InventoryItem;   
 use App\Models\InventoryUsage;  
-use App\Models\ReorderNotice;  
+use App\Models\ReorderNotice;   
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,16 +20,15 @@ class TransactionController extends Controller
     public function index(Request $request)
     {
         
-        $sortField = $request->query('sort', 'TransactionID'); // ID default
-        $sortDirection = $request->query('direction', 'desc'); // desc default
+        $sortField = $request->query('sort', 'TransactionID'); 
+        $sortDirection = $request->query('direction', 'desc'); 
 
-        // allowed sort arrays, anti sql injection
         $allowedSorts = ['TransactionID', 'DateCreated', 'TotalAmount', 'PaymentStatus'];
         if (!in_array($sortField, $allowedSorts)) {
             $sortField = 'TransactionID';
         }
 
-        $transactions = Transaction::with(['customer', 'user', 'transactionDetails']) // Eager load details for status
+        $transactions = Transaction::with(['customer', 'user', 'transactionDetails']) 
                                     ->orderBy($sortField, $sortDirection)
                                     ->get();
         
@@ -96,7 +95,11 @@ class TransactionController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('dashboard')->with('success', 'Transaction #' . $transaction->TransactionID . ' created successfully!');
+            
+            // CHANGED: Redirect to Show page with 'newly_created' flag instead of Dashboard
+            return redirect()->route('transactions.show', $transaction->TransactionID)
+                             ->with('success', 'Transaction #' . $transaction->TransactionID . ' created successfully!')
+                             ->with('newly_created', true);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -130,11 +133,9 @@ class TransactionController extends Controller
             'Notes' => 'nullable|string',
         ]);
 
-        // default: current timestamp
         if ($validatedData['PaymentStatus'] == 'Paid' && empty($validatedData['DatePaid'])) {
             $validatedData['DatePaid'] = Carbon::today('Asia/Manila')->toDateString();
         }
-        // clear date if unpaid
         if ($validatedData['PaymentStatus'] == 'Unpaid') {
             $validatedData['DatePaid'] = null;
         }
@@ -148,36 +149,38 @@ class TransactionController extends Controller
         }
     }
 
+    /**
+     * Display the thermal print view for a transaction.
+     */
+    public function print(Transaction $transaction)
+    {
+        $transaction->load(['customer', 'transactionDetails.service']);
+        return view('transactions.print', [
+            'transaction' => $transaction
+        ]);
+    }
+
     public function markAsCompleted(Transaction $transaction)
     {
         try {
             DB::beginTransaction();
 
-            // 1. Iterate through details to handle inventory deduction individually
             $details = $transaction->transactionDetails;
 
             foreach ($details as $detail) {
-                // Only process if not already completed to prevent double deduction
                 if ($detail->Status !== 'Completed') {
-                    
-                    // A. Update Status
                     $detail->update(['Status' => 'Completed']);
 
-                    // B. Inventory Deduction Logic (Mirrors TransactionDetailController)
                     $usageRules = InventoryUsage::where('ServiceID', $detail->ServiceID)->get();
 
                     if ($usageRules->isNotEmpty()) {
-                        // Get the order quantity (Weight takes precedence for deduction calc)
                         $orderQuantity = $detail->Weight ?? $detail->Quantity;
 
                         foreach ($usageRules as $rule) {
                             $inventoryItem = InventoryItem::find($rule->ItemID);
 
                             if ($inventoryItem) {
-                                // Calculate total to deduct
                                 $totalToDeduct = $orderQuantity * $rule->QuantityUsed;
-
-                                // Discrete Unit Handling (e.g., cannot use 0.5 of a hanger)
                                 $discreteUnits = ['pcs', 'pc', 'item', 'pair', 'hanger', 'bag', 'bags'];
                                 $itemUnit = strtolower($inventoryItem->Unit);
 
@@ -185,10 +188,8 @@ class TransactionController extends Controller
                                     $totalToDeduct = ceil($totalToDeduct);
                                 }
 
-                                // Deduct from stock
                                 $inventoryItem->decrement('Quantity', $totalToDeduct);
                                 
-                                // Check Reorder Level & Create Notice
                                 if ($inventoryItem->Quantity <= $inventoryItem->ReorderLevel) {
                                     $existingNotice = ReorderNotice::where('ItemID', $inventoryItem->ItemID)
                                                                    ->where('Status', 'Pending')
@@ -209,7 +210,6 @@ class TransactionController extends Controller
                 }
             }
 
-            // 2. Ensure Payment is Paid upon collection
             if ($transaction->PaymentStatus !== 'Paid') {
                 $transaction->update([
                     'PaymentStatus' => 'Paid',

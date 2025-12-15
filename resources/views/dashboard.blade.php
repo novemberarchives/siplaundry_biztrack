@@ -19,7 +19,7 @@
             </a>
             @endif
 
-            <!-- New Transaction Button-->
+            <!-- New Transaction Button (Enhanced UX) -->
             <a href="{{ route('transactions.create') }}" 
                class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-200 active:scale-95 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
@@ -28,10 +28,10 @@
         </div>
     </header>
 
-    <!-- Top Grid-->
+    <!-- Top Grid: KPI Cards (Adjusted to 3 columns) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
 
-        <!-- Daily Revenue -->
+        <!-- WIDGET 1: Daily Revenue (Green Bento Style) -->
         <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between h-48 hover:shadow-md transition group">
             <div class="flex justify-between items-start">
                 <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-2xl text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform">
@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <!-- Active Jobs  -->
+        <!-- WIDGET 2: Active Jobs (Blue/Indigo Bento Style) -->
         <div class="bg-indigo-600 p-6 rounded-[2rem] shadow-lg shadow-indigo-200 dark:shadow-none text-white flex flex-col justify-between h-48 hover:scale-[1.02] transition">
             <div class="flex justify-between items-start">
                 <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
@@ -58,7 +58,7 @@
             </div>
         </div>
 
-        <!-- Ready for Pickup Count -->
+        <!-- WIDGET 3: Ready for Pickup Count (Simple White Card) -->
         <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between h-48 hover:shadow-md transition">
             <div class="flex justify-between items-start">
                 <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600 dark:text-blue-400">
@@ -73,10 +73,10 @@
 
     </div>
 
-    <!-- Main Content Grid Work Queue & Pickup List -->
+    <!-- Main Content Grid: Work Queue & Pickup List -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- Work Queue -->
+        <!-- LEFT: Work Queue (Bento List Style - Spans 2 Columns) -->
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-8 min-h-[400px]">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Current Work Queue</h3>
@@ -130,7 +130,7 @@
             </div>
         </div>
 
-        <!-- Ready for Pickup List -->
+        <!-- RIGHT: Ready for Pickup List (Replaces "Staff on Duty") -->
         <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-8 h-fit">
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Ready for Pickup</h3>
             
@@ -150,14 +150,28 @@
                             <p class="text-xs text-green-700 dark:text-green-300 mt-1 font-medium">{{ $job->service->Name }}</p>
                         </div>
                         
-                        <!-- Mark Collected Button -->
-                        <div class="mt-4 pt-3 border-t border-green-200 dark:border-green-900/30">
-                            <form action="{{ route('transactions.complete', $job->transaction->TransactionID) }}" method="POST">
+                        <!-- Actions: Text & Mark Collected -->
+                        <div class="mt-4 pt-3 border-t border-green-200 dark:border-green-900/30 flex gap-2">
+                            <!-- SMS Button -->
+                            @if($job->transaction->customer->ContactNumber)
+                                @php
+                                    $phoneRaw = preg_replace('/[^0-9]/', '', $job->transaction->customer->ContactNumber);
+                                    $smsBody = "Hi " . $job->transaction->customer->Name . ", your item " . $job->service->Name . " (Order #" . $job->transaction->TransactionID . ") is READY for pickup! - Sip Laundry";
+                                @endphp
+                                <a href="sms:+{{ $phoneRaw }}?body={{ urlencode($smsBody) }}" 
+                                   class="flex items-center justify-center w-10 h-10 bg-green-200 dark:bg-green-800 text-green-700 dark:text-green-200 rounded-xl hover:bg-green-300 dark:hover:bg-green-700 transition-colors"
+                                   title="Text Customer">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                                </a>
+                            @endif
+
+                            <!-- Mark Collected Button -->
+                            <form action="{{ route('transactions.complete', $job->transaction->TransactionID) }}" method="POST" class="flex-1">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" 
                                         onclick="return confirm('Confirm that Order #{{ $job->transaction->TransactionID }} is paid and has been handed to the customer?')"
-                                        class="w-full flex items-center justify-center gap-2 py-2 bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 rounded-xl text-xs font-bold shadow-sm border border-green-100 dark:border-gray-600 hover:bg-green-600 hover:text-white dark:hover:bg-green-500 dark:hover:text-white transition-all duration-200">
+                                        class="w-full flex items-center justify-center gap-2 py-2 bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 rounded-xl text-xs font-bold shadow-sm border border-green-100 dark:border-gray-600 hover:bg-green-600 hover:text-white dark:hover:bg-green-500 dark:hover:text-white transition-all duration-200 h-10">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                     Mark Collected
                                 </button>
