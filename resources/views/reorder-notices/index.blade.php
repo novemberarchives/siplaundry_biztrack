@@ -4,10 +4,10 @@
 
 @section('content')
     <!-- Header Strip -->
-    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Reorder Notices</h1>
-            <p class="text-gray-500 dark:text-gray-400 font-medium">Alerts for low inventory levels.</p>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Reorder Notices</h1>
+            <p class="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium">Alerts for low inventory levels.</p>
         </div>
         
         <!-- Back to Inventory Button -->
@@ -21,31 +21,31 @@
     </header>
 
     <!-- Reorder Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-6">
         
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700 align-middle">
                 <thead>
                     <tr>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <th scope="col" class="pl-4 pr-3 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider w-24">
                             Status
                         </th>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <th scope="col" class="px-1 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Item Name
                         </th>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            Stock Level
+                        <th scope="col" class="px-1 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Stock
                         </th>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            Reorder Level
+                        <th scope="col" class="hidden sm:table-cell px-3 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Reorder Lv.
                         </th>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            Date Noticed
+                        <th scope="col" class="hidden md:table-cell px-3 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Noticed
                         </th>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            Date Resolved
+                        <th scope="col" class="hidden lg:table-cell px-3 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Resolved
                         </th>
-                        <th scope="col" class="relative px-4 py-4">
+                        <th scope="col" class="relative pl-3 pr-4 py-4 w-32">
                             <span class="sr-only">Actions</span>
                         </th>
                     </tr>
@@ -53,21 +53,24 @@
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse ($notices as $notice)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
-                            <td class="px-4 py-4 whitespace-nowrap">
+                            
+                            <!-- Status Badge -->
+                            <td class="pl-1 pr-2 py-4 text-center whitespace-nowrap">
                                 @if($notice->Status == 'Pending')
-                                    <span class="px-3 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-bold border border-yellow-200 dark:border-yellow-800 uppercase tracking-wider animate-pulse">
+                                    <span class="px-2.5 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-[10px] font-bold border border-yellow-200 dark:border-yellow-800 uppercase tracking-wider animate-pulse inline-block">
                                         Pending
                                     </span>
                                 @else
-                                    <span class="px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-800 uppercase tracking-wider">
+                                    <span class="px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold border border-green-200 dark:border-green-800 uppercase tracking-wider inline-block">
                                         Resolved
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-4">
-                                <div class="flex items-center gap-3">
-                                    <!-- Icon Avatar -->
-                                    <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center text-gray-500 dark:text-gray-400">
+
+                            <!-- Item Name -->
+                            <td class="px-1 py-4">
+                                <div class="flex items-center gap-3 min-w-[120px]">
+                                    <div class="hidden xs:flex w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex-shrink-0 items-center justify-center text-gray-500 dark:text-gray-400">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                                     </div>
                                     <span class="text-sm font-bold text-gray-900 dark:text-white leading-tight">
@@ -75,21 +78,32 @@
                                     </span>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap">
+
+                            <!-- Stock Level -->
+                            <td class="px-1 py-4 whitespace-nowrap">
                                 <span class="text-sm font-bold {{ ($notice->item->Quantity ?? 0) <= ($notice->item->ReorderLevel ?? 0) ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">
-                                    {{ $notice->item->Quantity ?? 'N/A' }} {{ $notice->item->Unit ?? '' }}
+                                    {{ $notice->item->Quantity ?? 'N/A' }} 
+                                    <span class="text-xs font-normal text-gray-500">{{ $notice->item->Unit ?? '' }}</span>
                                 </span>
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">
+
+                            <!-- Reorder Level (Hidden Mobile) -->
+                            <td class="hidden sm:table-cell px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">
                                 {{ $notice->item->ReorderLevel ?? 'N/A' }} {{ $notice->item->Unit ?? '' }}
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">
+
+                            <!-- Date Noticed (Hidden Small Tablet) -->
+                            <td class="hidden md:table-cell px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">
                                 {{ \Carbon\Carbon::parse($notice->NoticeDate)->format('M d, Y') }}
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+
+                            <!-- Date Resolved (Hidden Tablet) -->
+                            <td class="hidden lg:table-cell px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ $notice->ResolvedDate ? \Carbon\Carbon::parse($notice->ResolvedDate)->format('M d, Y') : '-' }}
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+
+                            <!-- Actions -->
+                            <td class="pl-3 pr-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 @if($notice->Status == 'Pending')
                                     <a href="{{ route('expenses.create', ['notice_id' => $notice->NoticeID]) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-bold underline decoration-2 decoration-blue-200 hover:decoration-blue-600 transition-all">
                                         Log Purchase

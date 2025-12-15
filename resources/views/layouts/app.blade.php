@@ -86,31 +86,39 @@
 
     <!-- Global Toast Notifications -->
     @if (session('success'))
-        <div id="toast-notification" class="fixed top-6 right-6 z-50 px-6 py-4 bg-green-500 text-white rounded-2xl shadow-xl shadow-green-500/20 flex items-center gap-3 transition-all duration-500 font-medium">
+        <div id="toast-notification" class="fixed top-6 right-6 z-[60] px-6 py-4 bg-green-500 text-white rounded-2xl shadow-xl shadow-green-500/20 flex items-center gap-3 transition-all duration-500 font-medium">
             <svg class="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             {{ session('success') }}
         </div>
     @endif
     @if (session('error'))
-        <div id="toast-notification" class="fixed top-6 right-6 z-50 px-6 py-4 bg-red-500 text-white rounded-2xl shadow-xl shadow-red-500/20 flex items-center gap-3 transition-all duration-500 font-medium">
+        <div id="toast-notification" class="fixed top-6 right-6 z-[60] px-6 py-4 bg-red-500 text-white rounded-2xl shadow-xl shadow-red-500/20 flex items-center gap-3 transition-all duration-500 font-medium">
             <svg class="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             {{ session('error') }}
         </div>
     @endif
 
+    <!-- MOBILE OVERLAY BACKDROP -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm hidden lg:hidden transition-opacity"></div>
+
     <!-- SIDEBAR -->
-    <aside class="hidden lg:flex w-72 h-screen p-4 flex-col gap-4 flex-shrink-0">
+    <!-- Changed: Added fixed positioning for mobile, transform classes for sliding -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 h-screen p-4 flex flex-col gap-4 flex-shrink-0 transition-transform duration-300 -translate-x-full lg:translate-x-0 lg:static lg:flex bg-gray-50 dark:bg-gray-900 lg:bg-transparent">
         
         <!-- Logo Area -->
-        <div class="h-20 bg-white dark:bg-gray-800 rounded-3xl flex items-center px-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-600/30">
-                <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo" class="w-20 md:w-24 mx-auto rounded-lg">
+        <div class="h-20 bg-white dark:bg-gray-800 rounded-3xl flex items-center px-6 shadow-sm border border-gray-100 dark:border-gray-700 justify-between lg:justify-start">
+            <div class="flex items-center">
+                    <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo" class="w-10 h-10 mx-auto rounded-lg">
+                <div class="ml-3">
+                    <h1 class="font-bold text-xl leading-tight text-gray-900 dark:text-white">Sip Laundry</h1>
+                    <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">BizTrack</p>
+                </div>
             </div>
-            
-            <div class="ml-3">
-                <h1 class="font-bold text-lg leading-tight text-gray-900 dark:text-white">Sip Laundry</h1>
-                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">BizTrack</p>
-            </div>
+
+            <!-- Close Button (Mobile Only) -->
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
 
         <!-- Navigation Menu -->
@@ -128,7 +136,7 @@
 
                 <!-- Dashboard -->
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Dashboard' ? $activeClass : $inactiveClass }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     Overview
                 </a>
 
@@ -138,7 +146,7 @@
                     Transactions
                 </a>
 
-                <!-- Customers (RESTORED: User Group Icon) -->
+                <!-- Customers -->
                 <a href="{{ route('customers.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Customers' ? $activeClass : $inactiveClass }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     Customers
@@ -156,6 +164,12 @@
                     Inventory
                 </a>
 
+                <!-- Reorder Notices (Staff & Manager) -->
+                <a href="{{ route('reorder-notices.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Reorder Notices' ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    Alerts
+                </a>
+
                 <!-- Manager Section -->
                 @if (Auth::user()->role === 'Manager')
                     <div class="px-4 mt-6 mb-2 text-xs font-extrabold text-gray-400 uppercase tracking-wider">Manager</div>
@@ -166,16 +180,10 @@
                         Analytics
                     </a>
 
-                    <!-- Expenses (RESTORED: Banknotes Icon) -->
+                    <!-- Expenses -->
                     <a href="{{ route('expenses.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Expenses' ? $activeClass : $inactiveClass }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                         Expenses
-                    </a>
-
-                    <!-- Reorder Notices -->
-                    <a href="{{ route('reorder-notices.index') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-semibold transition-all duration-200 {{ $currentModule == 'Reorder Notices' ? $activeClass : $inactiveClass }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                        Alerts
                     </a>
 
                     <!-- Audit Logs -->
@@ -219,11 +227,27 @@
         </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 h-screen overflow-y-auto p-4 lg:p-6 lg:pl-2">
-        <!-- Content gets injected here -->
-        @yield('content')
-    </main>
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        
+        <!-- MOBILE HEADER (Visible only on lg and smaller) -->
+        <header class="lg:hidden h-16 bg-white dark:bg-gray-800 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0 z-30">
+            <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo" class="w-10 h-10 mx-auto">
+                <span class="font-bold text-2xl text-gray-900 dark:text-white tracking-tight">Sip Laundry</span>
+            </div>
+            
+            <button onclick="toggleSidebar()" class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto p-4 lg:p-6 lg:pl-2">
+            <!-- Content gets injected here -->
+            @yield('content')
+        </main>
+    </div>
 
     <!-- Auto-hide Toast Notification Script -->
     <script>
@@ -236,6 +260,23 @@
                 }, 3000);
             }
         });
+
+        // Sidebar Toggle Logic
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            // Toggle translate class
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // Open
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                // Close
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
     </script>
 </body>
 </html>

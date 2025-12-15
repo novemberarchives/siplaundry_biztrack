@@ -4,40 +4,40 @@
 
 @section('content')
     <!-- Header Strip -->
-    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Expenses</h1>
-            <p class="text-gray-500 dark:text-gray-400 font-medium">Track operational costs and inventory purchases</p>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Expenses</h1>
+            <p class="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium">Track operational costs and inventory purchases</p>
         </div>
         
         <!-- Add New Expense Button -->
         <a href="{{ route('expenses.create') }}" 
-           class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-200 active:scale-95 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
+           class="w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-200 active:scale-95 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-500/20">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
             Log Expense
         </a>
     </header>
 
     <!-- Expense Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-6">
         
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700 align-middle">
                 <thead>
                     <tr>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-32">
+                        <th scope="col" class="hidden md:table-cell pl-4 pr-3 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-32 whitespace-nowrap">
                             Date
                         </th>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <th scope="col" class="pl-4 md:px-3 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Item Purchased
                         </th>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <th scope="col" class="hidden sm:table-cell px-3 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Quantity
                         </th>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <th scope="col" class="px-3 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Total Cost
                         </th>
-                        <th scope="col" class="px-4 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <th scope="col" class="hidden lg:table-cell px-3 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Remarks
                         </th>
                     </tr>
@@ -45,26 +45,42 @@
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse ($expenses as $expense)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">
+                            
+                            <!-- Date (Hidden Mobile) -->
+                            <td class="hidden md:table-cell pl-4 pr-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">
                                 {{ \Carbon\Carbon::parse($expense->Date)->format('M d, Y') }}
                             </td>
-                            <td class="px-4 py-4">
+
+                            <!-- Item Purchased -->
+                            <td class="pl-4 md:px-3 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/20 flex-shrink-0 flex items-center justify-center text-red-500 dark:text-red-400">
+                                    <div class="hidden xs:flex w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/20 flex-shrink-0 items-center justify-center text-red-500 dark:text-red-400">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                                     </div>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-white">
-                                        {{ $expense->item->Name ?? 'Item not found' }}
-                                    </span>
+                                    <div>
+                                        <span class="block text-sm font-bold text-gray-900 dark:text-white">
+                                            {{ $expense->item->Name ?? 'Item not found' }}
+                                        </span>
+                                        <!-- Mobile Only: Show Date & Qty underneath -->
+                                        <span class="md:hidden block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            {{ \Carbon\Carbon::parse($expense->Date)->format('M d') }} • +{{ $expense->QuantityPurchased }} {{ $expense->item->Unit ?? '' }}
+                                        </span>
+                                    </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">
+
+                            <!-- Quantity (Hidden Mobile) -->
+                            <td class="hidden sm:table-cell px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">
                                 +{{ $expense->QuantityPurchased }} {{ $expense->item->Unit ?? '' }}
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
+
+                            <!-- Total Cost -->
+                            <td class="px-3 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
                                 ₱{{ number_format($expense->TotalCost, 2) }}
                             </td>
-                            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
+
+                            <!-- Remarks (Hidden Tablet/Laptop) -->
+                            <td class="hidden lg:table-cell px-3 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
                                 {{ $expense->Remarks ?? '-' }}
                             </td>
                         </tr>
