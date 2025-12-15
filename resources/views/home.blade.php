@@ -131,8 +131,8 @@
                     <button type="submit" class="w-full py-3.5 px-4 bg-white dark:bg-transparent border-2 border-gray-100 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-300 font-bold rounded-xl transition-all">
                         Register New Account
                     </button>
-                </div>
-            </form> --}}
+                </div> --}}
+            </form>
 
         </div>
 
