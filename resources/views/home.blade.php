@@ -35,7 +35,6 @@
             <!-- Logo Area -->
             <div class="w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-2xl mx-auto mb-6 flex items-center justify-center">
                 <!-- Replace with your actual logo asset if available -->
-                <span class="text-3xl font-extrabold text-blue-600 dark:text-blue-400">Sip</span>
                 <img src="{{ asset('images/logo-siplaundry.png') }}" alt="Logo" class="w-20 rounded-xl">
             </div>
 
